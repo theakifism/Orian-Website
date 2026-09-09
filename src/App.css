@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --animate-grid-scroll: gridScroll 20s linear infinite;
+  --animate-float-glow-1: floatGlow1 12s ease-in-out infinite;
+  --animate-float-glow-2: floatGlow2 15s ease-in-out infinite;
+  --animate-spin-slow: spinSlow 50s linear infinite;
+  --animate-spin-slow-reverse: spinSlowReverse 70s linear infinite;
+  --animate-spin-fast: spinSlow 22s linear infinite;
+  --animate-drift: drift 22s ease-in-out infinite;
+  --animate-pulse-slow: pulseSlow 5s ease-in-out infinite;
+  --animate-rise: rise 9s ease-in infinite;
+  --animate-ping-soft: pingSoft 4s cubic-bezier(0,0.6,0.4,1) infinite;
+
+  @keyframes rise {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    10% { opacity: 0.9; }
+    85% { opacity: 0.5; }
+    100% { transform: translateY(-260px) translateX(var(--drift-x, 20px)); opacity: 0; }
+  }
+
+  @keyframes pingSoft {
+    0% { transform: scale(0.6); opacity: 0.5; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  @keyframes gridScroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 4rem 4rem; }
+  }
+
+  @keyframes floatGlow1 {
+    0%, 100% {
+      transform: translate(0px, 0px) scale(1);
+      opacity: 0.45;
+    }
+    50% {
+      transform: translate(60px, 40px) scale(1.25);
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes floatGlow2 {
+    0%, 100% {
+      transform: translate(0px, 0px) scale(1.1);
+      opacity: 0.35;
+    }
+    50% {
+      transform: translate(-50px, -30px) scale(0.9);
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes spinSlowReverse {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0px, 0px); }
+    50% { transform: translate(30px, -25px); }
+  }
+
+  --animate-float: floatCard 4s ease-in-out infinite;
+  @keyframes floatCard {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes pulseSlow {
+    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15); }
+  }
+}
+
+/* ---------------------------------------------------- */
+/* Theme tokens — Light is default, .dark overrides it. */
+/* ---------------------------------------------------- */
+:root {
+  --bg: #F3F5F9;
+  --surface: #FFFFFF;
+  --surface-alt: #EAEEF4;
+  --surface-strong: #E0E5EE;
+  --border: rgba(15, 23, 42, 0.09);
+  --border-strong: rgba(15, 23, 42, 0.18);
+  --overlay: rgba(15, 23, 42, 0.035);
+  --overlay-strong: rgba(15, 23, 42, 0.07);
+  --text: #0B0D12;
+  --text-soft: #384152;
+  --text-dim: #626C7E;
+  --text-faint: #8993A4;
+  --map-filter: none;
+  --shadow-ambient: 0 10px 40px rgba(15, 23, 42, 0.08);
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0A0C10;
+  --surface: #12151C;
+  --surface-alt: #0E1118;
+  --surface-strong: #181E2A;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --overlay: rgba(255, 255, 255, 0.05);
+  --overlay-strong: rgba(255, 255, 255, 0.1);
+  --text: #FFFFFF;
+  --text-soft: #D1D5DB;
+  --text-dim: #9CA3AF;
+  --text-faint: #6B7280;
+  --map-filter: invert(90%) hue-rotate(180deg) contrast(120%) brightness(90%);
+  --shadow-ambient: 0 10px 40px rgba(0, 0, 0, 0.8);
+  color-scheme: dark;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  background-color: var(--bg);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}

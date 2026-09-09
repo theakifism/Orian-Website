@@ -1,0 +1,809 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --animate-grid-scroll: gridScroll 20s linear infinite;
+  --animate-float-glow-1: floatGlow1 12s ease-in-out infinite;
+  --animate-float-glow-2: floatGlow2 15s ease-in-out infinite;
+  --animate-spin-slow: spinSlow 50s linear infinite;
+  --animate-spin-slow-reverse: spinSlowReverse 70s linear infinite;
+  --animate-spin-fast: spinSlow 22s linear infinite;
+  --animate-drift: drift 22s ease-in-out infinite;
+  --animate-pulse-slow: pulseSlow 5s ease-in-out infinite;
+
+  @keyframes gridScroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 4rem 4rem; }
+  }
+
+  @keyframes floatGlow1 {
+    0%, 100% {
+      transform: translate(0px, 0px) scale(1);
+      opacity: 0.45;
+    }
+    50% {
+      transform: translate(60px, 40px) scale(1.25);
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes floatGlow2 {
+    0%, 100% {
+      transform: translate(0px, 0px) scale(1.1);
+      opacity: 0.35;
+    }
+    50% {
+      transform: translate(-50px, -30px) scale(0.9);
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes spinSlowReverse {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0px, 0px); }
+    50% { transform: translate(30px, -25px); }
+  }
+
+  --animate-float: floatCard 4s ease-in-out infinite;
+  @keyframes floatCard {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes pulseSlow {
+    0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.15); }
+  }
+}
+
+/* ---------------------------------------------------- */
+/* Theme tokens — Light is default, .dark overrides it. */
+/* ---------------------------------------------------- */
+:root {
+  --bg: #F3F5F9;
+  --surface: #FFFFFF;
+  --surface-alt: #EAEEF4;
+  --surface-strong: #E0E5EE;
+  --border: rgba(15, 23, 42, 0.09);
+  --border-strong: rgba(15, 23, 42, 0.18);
+  --overlay: rgba(15, 23, 42, 0.035);
+  --overlay-strong: rgba(15, 23, 42, 0.07);
+  --text: #0B0D12;
+  --text-soft: #384152;
+  --text-dim: #626C7E;
+  --text-faint: #8993A4;
+  --map-filter: none;
+  --shadow-ambient: 0 10px 40px rgba(15, 23, 42, 0.08);
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0A0C10;
+  --surface: #12151C;
+  --surface-alt: #0E1118;
+  --surface-strong: #181E2A;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --overlay: rgba(255, 255, 255, 0.05);
+  --overlay-strong: rgba(255, 255, 255, 0.1);
+  --text: #FFFFFF;
+  --text-soft: #D1D5DB;
+  --text-dim: #9CA3AF;
+  --text-faint: #6B7280;
+  --map-filter: invert(90%) hue-rotate(180deg) contrast(120%) brightness(90%);
+  --shadow-ambient: 0 10px 40px rgba(0, 0, 0, 0.8);
+  color-scheme: dark;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  background-color: var(--bg);
+  scroll-behavior: smooth;
+  /* Offsets in-page anchor jumps (nav links, "#services" etc.) so the
+     target section's heading lands below the fixed 80px-tall header
+     instead of underneath it. */
+  scroll-padding-top: 100px;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ---------------------------------------------------- */
+/* Hero orbit diagram — the ONE animation left running on */
+/* mobile. Kept on its own dedicated classes (instead of  */
+/* the shared animate-* utilities below) so the mobile     */
+/* motion-off rule further down can never touch it.        */
+/* ---------------------------------------------------- */
+.orbit-ring-outer {
+  animation: spinSlow 50s linear infinite;
+}
+
+.orbit-ring-middle {
+  animation: spinSlowReverse 70s linear infinite;
+}
+
+.orbit-ring-inner {
+  animation: spinSlow 22s linear infinite;
+}
+
+.orbit-icon-float {
+  animation: floatCard 4s ease-in-out infinite;
+}
+
+.orbit-glow-pulse {
+  animation: pulseSlow 5s ease-in-out infinite;
+}
+
+.orbit-live-dot {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-ring-outer,
+  .orbit-ring-middle,
+  .orbit-ring-inner,
+  .orbit-icon-float,
+  .orbit-glow-pulse,
+  .orbit-live-dot {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------- */
+/* Interactive3DNetwork — the draggable 3D "gyroscope"   */
+/* diagram used across several pages. Each ring keeps    */
+/* its own static tilt (set via --i3d-tiltx/--i3d-tilty  */
+/* custom props) while spinning continuously around its  */
+/* own plane, so the parent's drag-driven rotateX/rotateY */
+/* (applied imperatively in JS) and this rim-spin never   */
+/* fight over the `transform` property.                  */
+/* ---------------------------------------------------- */
+.i3d-ring-a {
+  animation: i3dRingSpin 16s linear infinite;
+}
+
+.i3d-ring-b {
+  animation: i3dRingSpin 22s linear infinite reverse;
+}
+
+.i3d-ring-c {
+  animation: i3dRingSpin 10s linear infinite;
+}
+
+@keyframes i3dRingSpin {
+  from {
+    transform: rotateX(var(--i3d-tiltx, 0deg)) rotateY(var(--i3d-tilty, 0deg)) rotateZ(0deg);
+  }
+  to {
+    transform: rotateX(var(--i3d-tiltx, 0deg)) rotateY(var(--i3d-tilty, 0deg)) rotateZ(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .i3d-ring-a,
+  .i3d-ring-b,
+  .i3d-ring-c {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------- */
+/* Route transitions — a top progress bar + a fade/rise  */
+/* on the incoming page, so navigating between routes    */
+/* reads as "a new page", not "this page changed".       */
+/* ---------------------------------------------------- */
+.route-bar-run {
+  animation: routeBarRun 0.48s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes routeBarRun {
+  0% {
+    width: 0%;
+    opacity: 1;
+  }
+  70% {
+    width: 88%;
+    opacity: 1;
+  }
+  100% {
+    width: 100%;
+    opacity: 0;
+  }
+}
+
+.page-enter {
+  animation: pageEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-bar-run,
+  .page-enter {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------- */
+/* Scroll effects: edge blur vignette + reveal-on-scroll */
+/* ---------------------------------------------------- */
+
+.scroll-edge-blur {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 110px;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.scroll-edge-blur.is-visible {
+  opacity: 1;
+}
+
+.scroll-edge-blur-top {
+  top: 80px; /* sits just below the fixed nav */
+  height: 70px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+  background: linear-gradient(to bottom, var(--bg) 15%, transparent 100%);
+}
+
+.scroll-edge-blur-bottom {
+  bottom: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  background: linear-gradient(to top, var(--bg) 25%, transparent 100%);
+}
+
+.reveal {
+  opacity: 0;
+  filter: blur(14px);
+  transform: translateY(var(--reveal-y, 56px)) scale(0.97);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform, filter;
+}
+
+.reveal.in-view {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateY(0) scale(1);
+}
+
+/* --- 3D variant: content tilts up out of the page as it scrolls in --- */
+.reveal-3d {
+  perspective: 1400px;
+}
+
+.reveal-3d {
+  transform:
+    perspective(1400px)
+    translateY(var(--reveal-y, 64px))
+    rotateX(var(--reveal-rotate, 20deg))
+    scale(0.92);
+  transform-origin: var(--reveal-origin, center bottom);
+  filter: blur(10px);
+  transition:
+    opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-3d.in-view {
+  transform: perspective(1400px) translateY(0) rotateX(0deg) scale(1);
+  filter: blur(0px);
+}
+
+/* Give any cards/grid items inside a revealed section a subtle staggered
+   pop so they don't all snap in at once — but stop short of styling
+   the actual card element itself, so its own hover effects (color,
+   scale, translate, group-hover text) are never overridden here. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-3d,
+  .tilt-card-inner {
+    transition: none;
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+  .scroll-edge-blur {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------- */
+/* Mobile: kill every decorative animation except the    */
+/* hero orbit diagram (see .orbit-* classes above).      */
+/*                                                        */
+/* This is a CSS-level guarantee on top of the JS-level   */
+/* `reduceMotion` checks in ScrollFXContext/Reveal/       */
+/* TiltCard/ShatterTitle/ParticleNetworkBG/Hero — so      */
+/* nothing can slip through and animate on a phone even   */
+/* for a frame before React mounts.                       */
+/* ---------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Shared Tailwind-generated motion utilities used for background
+     glows, floating cards, "live" dots, etc. Intentionally does NOT
+     include the .orbit-* classes, which are separate class names. */
+  .animate-pulse,
+  .animate-ping,
+  .animate-float,
+  .animate-spin-slow,
+  .animate-spin-slow-reverse,
+  .animate-spin-fast,
+  .animate-pulse-slow,
+  .animate-float-glow-1,
+  .animate-float-glow-2,
+  .animate-drift,
+  .animate-grid-scroll,
+  .ambient-glow-border {
+    animation: none !important;
+  }
+
+  /* Belt-and-suspenders in case a section renders before the JS
+     reduceMotion flag is read: no blur/tilt/slide-in, just visible. */
+  .reveal,
+  .reveal-3d,
+  .tilt-card-inner {
+    transition: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  /* The fixed top/bottom backdrop-filter strips force the browser to
+     recompute a blur over whatever's scrolling behind them on every
+     frame — costly on low-end phones, and purely decorative. */
+  .scroll-edge-blur {
+    display: none;
+  }
+}
+
+/* Touch/no-hover devices: a tap can leave an element "stuck" in its
+   :hover state until the next tap elsewhere, which makes hover-triggered
+   scale/translate card effects look like random jitter while scrolling.
+   Neutralize hover-driven movement (not color/shadow) wherever it fires
+   on a device that has no real pointer to hover with. */
+@media (hover: none) {
+  *:hover {
+    transform: none !important;
+  }
+
+  /* Exempt the orbit diagram and everything inside it — its rings spin
+     via a running CSS animation, not a hover trigger, and the blanket
+     rule above would otherwise be able to freeze that transform. */
+  .orbit-diagram:hover,
+  .orbit-diagram :hover {
+    transform: revert !important;
+  }
+}
+
+/* ---------------------------------------------------- */
+/* TiltCard: cursor-tracking 3D tilt + scroll pop-in     */
+/* Two-layer wrapper so it never touches the card's own  */
+/* className/hover styles — those keep working as-is.    */
+/* ---------------------------------------------------- */
+.tilt-card-outer {
+  perspective: 1000px;
+}
+
+.tilt-card-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Cursor-tracked glow, layered above the card and driven by TiltCard's
+   pointer-position state. pointer-events: none keeps it from blocking the
+   card's own native :hover styles underneath it. */
+.tilt-card-spotlight {
+  position: absolute;
+  inset: 0;
+  /* Matches the rounded-2xl radius used on every card this wraps. */
+  border-radius: 1rem;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s ease;
+}
+
+/* ---------------------------------------------------- */
+/* Success checkmark animation (Special Requirement form) */
+/* ---------------------------------------------------- */
+
+.tick-ripple {
+  animation: tick-ripple 0.9s ease-out 0.05s both;
+}
+
+.tick-ripple-2 {
+  animation: tick-ripple 1.1s ease-out 0.2s both;
+}
+
+.tick-ripple-3 {
+  animation: tick-ripple 1.3s ease-out 0.35s both;
+}
+
+.tick-flash {
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.35) 0%, rgba(0, 174, 239, 0.18) 45%, transparent 70%);
+  animation: tick-flash 1s ease-out 0.05s both;
+}
+
+.tick-pop {
+  animation: tick-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s both;
+}
+
+.tick-glow {
+  animation:
+    tick-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s both,
+    tick-glow-pulse 2s ease-in-out 0.6s infinite;
+}
+
+.tick-circle {
+  stroke-dasharray: 145;
+  stroke-dashoffset: 145;
+  animation: tick-draw 0.5s ease-out 0.15s forwards;
+}
+
+.tick-check {
+  stroke-dasharray: 34;
+  stroke-dashoffset: 34;
+  animation: tick-draw 0.35s ease-out 0.6s forwards;
+}
+
+.confetti-piece {
+  left: 50%;
+  top: 50%;
+  opacity: 0;
+  animation: confetti-burst 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.confetti-rain-piece {
+  top: -5%;
+  opacity: 0;
+  animation-name: confetti-rain;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
+.tick-fade-1,
+.tick-fade-2,
+.tick-fade-3 {
+  opacity: 0;
+  animation: tick-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.tick-fade-1 {
+  animation-delay: 0.8s;
+}
+
+.tick-fade-2 {
+  animation-delay: 0.92s;
+}
+
+.tick-fade-3 {
+  animation-delay: 1.04s;
+}
+
+/* Pulsing celebratory glow around the whole card while showing success */
+.celebrate-border {
+  animation: celebrate-glow 1.8s ease-in-out 0.1s 3;
+}
+
+/* Continuous ambient glow on the AI Assistant card — never stops, keeps
+   that section feeling alive/dynamic rather than static. Cycles through
+   the brand palette each breath. */
+.ambient-glow-border {
+  animation: ambient-glow 8s ease-in-out infinite;
+}
+
+/* Sparkles orbiting the icon */
+.sparkle {
+  position: absolute;
+  font-size: 1.1rem;
+  opacity: 0;
+  animation: sparkle-pop 1.6s ease-out forwards;
+}
+
+.sparkle-1 {
+  top: -6px;
+  left: -10px;
+  animation-delay: 0.55s;
+}
+
+.sparkle-2 {
+  top: 6px;
+  right: -16px;
+  font-size: 0.9rem;
+  animation-delay: 0.75s;
+}
+
+.sparkle-3 {
+  bottom: -8px;
+  left: 20%;
+  font-size: 0.85rem;
+  animation-delay: 0.95s;
+}
+
+/* Shimmering gradient sweep across the success heading */
+.shimmer-text {
+  background: linear-gradient(90deg, var(--text) 0%, var(--text) 40%, #00aeef 50%, var(--text) 60%, var(--text) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer-sweep 2.4s linear 1.1s 3;
+}
+
+@keyframes tick-ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes tick-flash {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes tick-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes tick-glow-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(0, 174, 239, 0.55));
+  }
+}
+
+@keyframes tick-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes confetti-burst {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(0.4);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes tick-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes celebrate-glow {
+  0%,
+  100% {
+    box-shadow: 0 25px 70px -20px rgba(0, 174, 239, 0.25);
+    border-color: rgba(52, 211, 153, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 60px 6px rgba(52, 211, 153, 0.35), 0 0 90px 20px rgba(0, 174, 239, 0.2);
+    border-color: rgba(0, 174, 239, 0.6);
+  }
+}
+
+@keyframes ambient-glow {
+  0% {
+    box-shadow: 0 25px 70px -20px rgba(0, 174, 239, 0.3), 0 0 45px 6px rgba(0, 174, 239, 0.45);
+    border-color: rgba(0, 174, 239, 0.75);
+  }
+  25% {
+    box-shadow: 0 25px 70px -20px rgba(0, 174, 239, 0.3), 0 0 45px 6px rgba(168, 85, 247, 0.45);
+    border-color: rgba(168, 85, 247, 0.75);
+  }
+  50% {
+    box-shadow: 0 25px 70px -20px rgba(0, 174, 239, 0.3), 0 0 45px 6px rgba(232, 162, 61, 0.45);
+    border-color: rgba(232, 162, 61, 0.75);
+  }
+  75% {
+    box-shadow: 0 25px 70px -20px rgba(0, 174, 239, 0.3), 0 0 45px 6px rgba(52, 211, 153, 0.45);
+    border-color: rgba(52, 211, 153, 0.75);
+  }
+  100% {
+    box-shadow: 0 25px 70px -20px rgba(0, 174, 239, 0.3), 0 0 45px 6px rgba(0, 174, 239, 0.45);
+    border-color: rgba(0, 174, 239, 0.75);
+  }
+}
+
+@keyframes sparkle-pop {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(1.1) rotate(15deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8) translateY(-14px) rotate(-10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@keyframes confetti-rain {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(115vh) rotate(var(--rot));
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------- */
+/* Preloader / splash screen                             */
+/* ---------------------------------------------------- */
+
+.preloader-spin {
+  animation: preloader-spin 1.6s linear infinite;
+}
+
+.preloader-logo {
+  animation: preloader-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.preloader-glow {
+  animation: preloader-glow-pulse 1.8s ease-in-out 0.6s infinite;
+}
+
+.preloader-ripple {
+  animation: preloader-ripple 1.8s ease-out infinite;
+}
+
+.preloader-bar {
+  animation: preloader-bar 1.4s ease-in-out infinite;
+}
+
+@keyframes preloader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes preloader-pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes preloader-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+
+@keyframes preloader-ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+@keyframes preloader-bar {
+  0% {
+    transform: translateX(-110%);
+  }
+  50% {
+    transform: translateX(20%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
