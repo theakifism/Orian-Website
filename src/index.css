@@ -205,6 +205,56 @@ body {
 }
 
 /* ---------------------------------------------------- */
+/* AnimatedIconBadge — tiny "live network" ring used on  */
+/* option/feature cards across every page.               */
+/* ---------------------------------------------------- */
+.icon-badge-ring {
+  animation: iconBadgeSpin 7s linear infinite;
+}
+
+.icon-badge-pulse {
+  animation: iconBadgePulse 3s ease-in-out infinite;
+}
+
+@keyframes iconBadgeSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes iconBadgePulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.9); }
+  50% { opacity: 0.9; transform: scale(1.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-badge-ring,
+  .icon-badge-pulse {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------- */
+/* MapEmbed — futuristic HUD sweep line over the map     */
+/* ---------------------------------------------------- */
+.map-scan-line {
+  animation: mapScan 5s ease-in-out infinite;
+}
+
+@keyframes mapScan {
+  0% { top: -20%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-scan-line {
+    animation: none;
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------- */
 /* Route transitions — a top progress bar + a fade/rise  */
 /* on the incoming page, so navigating between routes    */
 /* reads as "a new page", not "this page changed".       */
@@ -348,22 +398,23 @@ body {
 }
 
 /* ---------------------------------------------------- */
-/* Mobile: kill every decorative animation except the    */
-/* hero orbit diagram (see .orbit-* classes above).      */
+/* Mobile motion strategy                                 */
 /*                                                        */
-/* This is a CSS-level guarantee on top of the JS-level   */
-/* `reduceMotion` checks in ScrollFXContext/Reveal/       */
-/* TiltCard/ShatterTitle/ParticleNetworkBG/Hero — so      */
-/* nothing can slip through and animate on a phone even   */
-/* for a frame before React mounts.                       */
+/* Only the handful of animations that are genuinely      */
+/* expensive (large continuous full-viewport loops) stay  */
+/* off on phones. Cheap, compositor-only motion (opacity  */
+/* pulses/pings, small transform floats) now runs on      */
+/* mobile too — it never caused the jank, and switching it */
+/* off entirely was making the phone experience feel      */
+/* static next to the desktop one. Scroll-entrance motion  */
+/* also now runs on mobile, through the lighter            */
+/* `.reveal-mobile` treatment further down instead of the  */
+/* full 3D blur/tilt version — see Reveal.jsx/TiltCard.jsx. */
 /* ---------------------------------------------------- */
 @media (max-width: 768px) {
-  /* Shared Tailwind-generated motion utilities used for background
-     glows, floating cards, "live" dots, etc. Intentionally does NOT
-     include the .orbit-* classes, which are separate class names. */
-  .animate-pulse,
-  .animate-ping,
-  .animate-float,
+  /* Large continuous background loops — kept off. These would only ever
+     matter if the (currently unused) BackgroundFX component gets wired
+     back in, but there's no cost to leaving the guard in place. */
   .animate-spin-slow,
   .animate-spin-slow-reverse,
   .animate-spin-fast,
@@ -371,13 +422,13 @@ body {
   .animate-float-glow-1,
   .animate-float-glow-2,
   .animate-drift,
-  .animate-grid-scroll,
-  .ambient-glow-border {
+  .animate-grid-scroll {
     animation: none !important;
   }
 
   /* Belt-and-suspenders in case a section renders before the JS
-     reduceMotion flag is read: no blur/tilt/slide-in, just visible. */
+     reduceMotion flag is read. Reveal/TiltCard now render `.reveal-mobile`
+     on phones instead of these classnames, so this is just a safety net. */
   .reveal,
   .reveal-3d,
   .tilt-card-inner {
@@ -393,6 +444,36 @@ body {
   .scroll-edge-blur {
     display: none;
   }
+
+  /* BackgroundFX: the animation itself is already killed above, but a
+     100–120px CSS `blur()` filter is expensive to keep in the compositing
+     layer even while static — it's a big contributor to scroll jank on
+     phones. Shrinking + fading these (rather than a full display: none)
+     keeps the same ambient color mood, at a fraction of the paint cost. */
+  .bg-fx-ring {
+    width: 480px !important;
+    height: 480px !important;
+    opacity: 0.2 !important;
+  }
+  .bg-fx-glow {
+    width: 220px !important;
+    height: 220px !important;
+    filter: blur(60px) !important;
+  }
+
+  /* ---- Card / section spacing, tightened for phone widths ---- */
+  /* Same design system, smaller measurements — every one of these is a
+     bare (non-`md:`) utility class, so this only ever touches the mobile
+     rendering and never the `md:`/`lg:` variants used at wider widths. */
+  .p-8 { padding: 1.25rem !important; }
+  .p-10, .p-12 { padding: 1.5rem !important; }
+  .py-24 { padding-top: 3.5rem !important; padding-bottom: 3.5rem !important; }
+  .py-20 { padding-top: 3rem !important; padding-bottom: 3rem !important; }
+  .py-16 { padding-top: 2.5rem !important; padding-bottom: 2.5rem !important; }
+  .gap-8 { gap: 1.1rem !important; }
+  .gap-10 { gap: 1.35rem !important; }
+  .gap-12 { gap: 1.5rem !important; }
+  .mb-12 { margin-bottom: 1.75rem !important; }
 }
 
 /* Touch/no-hover devices: a tap can leave an element "stuck" in its
@@ -806,4 +887,79 @@ body {
   100% {
     transform: translateX(220%);
   }
+}
+
+/* ---------------------------------------------------- */
+/* Mobile scroll-entrance & tap feedback                 */
+/*                                                        */
+/* `.reveal-mobile` is the cheap opacity + rise used by   */
+/* Reveal.jsx and TiltCard.jsx whenever ScrollFXContext   */
+/* reports a phone-width screen -- no blur, no 3D tilt,   */
+/* just enough motion for sections/cards to feel like     */
+/* they arrive instead of just being there.               */
+/* ---------------------------------------------------- */
+.reveal-mobile {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-mobile.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* A one-time fade+rise for elements that are already on-screen at load
+   (so an IntersectionObserver-based reveal wouldn't reliably fire) --
+   used by the AI Assistant card. Scoped entirely inside the mobile media
+   query, so applying this class has zero effect at desktop widths. */
+@media (max-width: 768px) {
+  .mobile-fade-in {
+    animation: mobile-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes mobile-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Small tap-feedback for touch devices -- a quick scale-down so a tap
+   feels acknowledged instead of static. `(hover: none)` keeps this off
+   mouse/trackpad devices so it never fights with a hover/tilt effect. */
+@media (hover: none) {
+  .tap-feedback:active {
+    transform: scale(0.94) !important;
+    transition: transform 0.15s ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-mobile,
+  .mobile-fade-in,
+  .tap-feedback:active {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ---------------------------------------------------- */
+/* Admin: mobile bottom tab bar                          */
+/*                                                        */
+/* Replaces the desktop icon/label sidebar on phones (see */
+/* admin/MobileTabBar.jsx) -- a fixed thumb-reachable bar  */
+/* instead of a squeezed-down rail down the side.          */
+/* ---------------------------------------------------- */
+.admin-mobile-tabbar {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
