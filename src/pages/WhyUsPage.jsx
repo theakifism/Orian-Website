@@ -1,10 +1,13 @@
 import React from 'react';
 import PageHeader from '../components/PageHeader';
+import Seo from '../seo/Seo';
+import { pageMeta } from '../seo/pageMeta';
 import WhyUs from '../components/WhyUs';
 
 const WhyUsPage = () => {
   return (
     <>
+      <Seo title={pageMeta.whyUs.title} description={pageMeta.whyUs.description} path={pageMeta.whyUs.path} />
       <PageHeader
         eyebrow="Why Orian"
         title="Six reasons enterprises"

@@ -1,5 +1,7 @@
 import React from 'react';
 import PageHeader from '../components/PageHeader';
+import Seo from '../seo/Seo';
+import { pageMeta } from '../seo/pageMeta';
 import Careers from '../components/Careers';
 
 const values = [
@@ -11,6 +13,7 @@ const values = [
 const CareersPage = () => {
   return (
     <>
+      <Seo title={pageMeta.careers.title} description={pageMeta.careers.description} path={pageMeta.careers.path} />
       <PageHeader
         eyebrow="Careers & Culture"
         title="Help us build the"
@@ -21,6 +24,10 @@ const CareersPage = () => {
       />
 
       <section className="relative pb-4 bg-transparent overflow-hidden">
+        {/* Visually hidden — keeps the h1 -> h2 -> h3 heading order intact
+            without changing the page's visual design (the section doesn't
+            need a visible heading of its own above the value cards). */}
+        <h2 className="sr-only">Life at Orian Teleservices</h2>
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
           {values.map((v) => (
             <div

@@ -1,11 +1,14 @@
 import React from 'react';
 import PageHeader from '../components/PageHeader';
+import Seo from '../seo/Seo';
+import { pageMeta } from '../seo/pageMeta';
 import Contact from '../components/Contact';
 import SpecialRequirement from '../components/SpecialRequirement';
 
 const ContactPage = () => {
   return (
     <>
+      <Seo title={pageMeta.contact.title} description={pageMeta.contact.description} path={pageMeta.contact.path} />
       <PageHeader
         eyebrow="Contact Us"
         title="Let's start a"

@@ -1,5 +1,7 @@
 import React from 'react';
 import PageHeader from '../components/PageHeader';
+import Seo from '../seo/Seo';
+import { pageMeta } from '../seo/pageMeta';
 import About from '../components/About';
 import Interactive3DNetwork from '../components/Interactive3DNetwork';
 
@@ -13,6 +15,7 @@ const milestones = [
 const AboutPage = () => {
   return (
     <>
+      <Seo title={pageMeta.about.title} description={pageMeta.about.description} path={pageMeta.about.path} />
       <PageHeader
         eyebrow="About Orian"
         title="Built by messaging"

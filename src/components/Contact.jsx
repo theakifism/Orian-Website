@@ -1,4 +1,5 @@
 import React from 'react';
+import MapEmbed from './MapEmbed';
 
 const Contact = () => {
   return (
@@ -43,21 +44,7 @@ const Contact = () => {
           </div>
 
           {/* Right Column: Theme-Aware Map Embed */}
-          <div className="relative h-96 lg:h-auto min-h-[380px] rounded-2xl overflow-hidden border border-[var(--border)] shadow-[var(--shadow-ambient)] hover:border-[#00AEEF]/50 transition-all duration-500 group">
-            <iframe
-              title="Orian Teleservices Location"
-              src="https://www.google.com/maps?q=Plot%20no%202%2C%20Kgn%20Nagar%2C%20near%20St%20Joseph%20School%2C%20Godhni%2C%20Nagpur%2C%20Maharashtra%20441123&output=embed"
-              width="100%"
-              height="100%"
-              style={{ border: 0, filter: 'var(--map-filter)' }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-            <div className="absolute top-4 left-4 p-3 bg-black/80 backdrop-blur-md rounded-xl border border-white/10 text-xs font-mono text-white pointer-events-none">
-              <span className="text-[#00AEEF] font-bold">Orian HQ</span> • Nagpur, India
-            </div>
-          </div>
+          <MapEmbed className="h-96 lg:h-auto min-h-[380px]" />
 
         </div>
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
+import Seo from '../seo/Seo';
+import { buildIndustryMeta } from '../seo/dynamicMeta';
 import { getIndustryBySlug, industries } from '../data/industries';
 import { getServiceBySlug } from '../data/services';
 import { CheckCircleIcon } from '../components/CardIcons';
@@ -14,9 +16,11 @@ const IndustryDetailPage = () => {
   }
 
   const related = industries.filter((i) => i.slug !== industry.slug).slice(0, 3);
+  const meta = buildIndustryMeta(industry);
 
   return (
     <>
+      <Seo title={meta.title} description={meta.description} path={`/industries/${industry.slug}`} />
       <PageHeader
         eyebrow="Industry"
         title={industry.name}

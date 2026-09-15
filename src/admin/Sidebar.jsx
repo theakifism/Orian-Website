@@ -9,7 +9,7 @@ const NAV_ITEMS = [
 
 const Sidebar = ({ tab, onTabChange, collapsed, onToggleCollapsed, newCount }) => (
   <aside
-    className={`bg-[var(--surface)] border-r border-[var(--border)] flex flex-col transition-all duration-200 ${
+    className={`admin-sidebar hidden md:flex bg-[var(--surface)] border-r border-[var(--border)] flex-col transition-all duration-200 ${
       collapsed ? 'w-16' : 'w-56'
     }`}
   >

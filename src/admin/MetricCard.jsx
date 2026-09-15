@@ -16,11 +16,11 @@ const MetricCard = ({ label, value, daily, loading }) => {
   const trend = computeTrend(daily);
 
   return (
-    <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 relative overflow-hidden">
-      <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] mb-2">{label}</p>
+    <div className="bg-(--surface) border border-(--border) rounded-xl p-5 relative overflow-hidden">
+      <p className="text-xs font-mono uppercase tracking-wider text-(--text-faint) mb-2">{label}</p>
 
       {loading ? (
-        <div className="h-9 w-20 bg-[var(--overlay)] rounded animate-pulse" />
+        <div className="h-9 w-20 bg-(--overlay) rounded animate-pulse" />
       ) : (
         <div className="flex items-end justify-between gap-3">
           <p className="text-3xl font-bold">{value}</p>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import AnimatedIconBadge from './AnimatedIconBadge';
 import { HeadsetIcon, TagIcon, ShieldCheckIcon, BoltIcon, TowerIcon, TrendUpIcon } from './CardIcons';
 import { whyUsData } from '../data/whyUs';
 
@@ -59,12 +60,14 @@ const WhyUs = ({ variant = 'full' }) => {
                   e.currentTarget.style.borderColor = item.color;
                 }}
               >
-                <div
-                  className="w-11 h-11 rounded-xl border flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-1"
-                  style={{ color: item.color, borderColor: `${item.color}4D`, backgroundColor: `${item.color}1A` }}
-                >
-                  <Icon className="w-6 h-6" />
-                </div>
+                <AnimatedIconBadge color={item.color} size="sm" className="mb-4 transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                  <div
+                    className="w-9 h-9 rounded-xl border flex items-center justify-center"
+                    style={{ color: item.color, borderColor: `${item.color}4D`, backgroundColor: `${item.color}1A` }}
+                  >
+                    <Icon className="w-5 h-5" />
+                  </div>
+                </AnimatedIconBadge>
                 <h3 className="text-xl font-bold text-[var(--text)] mb-3 transition-all duration-300 group-hover:translate-x-1 group-hover:text-[var(--accent)]">
                   {item.title}
                 </h3>

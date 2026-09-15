@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
+import Seo from '../seo/Seo';
+import { pageMeta } from '../seo/pageMeta';
 import AiAssistant from '../components/AiAssistant';
 
 const punches = [
@@ -12,6 +14,7 @@ const punches = [
 const AssistantPage = () => {
   return (
     <>
+      <Seo title={pageMeta.assistant.title} description={pageMeta.assistant.description} path={pageMeta.assistant.path} />
       <PageHeader
         eyebrow="Live AI Assistant"
         title="Stop reading docs."
@@ -22,11 +25,11 @@ const AssistantPage = () => {
       />
 
       <section className="relative pb-4 bg-transparent overflow-hidden">
-        <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-2 sm:gap-4">
           {punches.map((p) => (
             <div
               key={p.label}
-              className="p-5 text-center bg-[var(--surface)]/80 border border-[var(--border)] rounded-2xl backdrop-blur-xl hover:border-purple-400/50 hover:shadow-[0_0_25px_rgba(168,85,247,0.2)] transition-all duration-300"
+              className="p-3 sm:p-5 text-center bg-[var(--surface)]/80 border border-[var(--border)] rounded-2xl backdrop-blur-xl hover:border-purple-400/50 hover:shadow-[0_0_25px_rgba(168,85,247,0.2)] transition-all duration-300"
             >
               <div className="text-2xl md:text-3xl font-extrabold font-mono bg-gradient-to-r from-[#00AEEF] to-purple-400 bg-clip-text text-transparent">
                 {p.value}

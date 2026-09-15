@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Send } from 'lucide-react';
 
 const AiAssistant = ({ showHeading = true }) => {
   const [messages, setMessages] = useState([
@@ -135,14 +136,16 @@ const AiAssistant = ({ showHeading = true }) => {
           </div>
         )}
 
-        <div className="ambient-glow-border relative overflow-hidden bg-[var(--surface)]/35 border-2 border-[#00AEEF]/60 rounded-2xl p-6 shadow-[0_25px_70px_-20px_rgba(0,174,239,0.25)] flex flex-col h-120 backdrop-blur-2xl">
+        <div className="mobile-fade-in ambient-glow-border relative overflow-hidden bg-[var(--surface)]/35 border-2 border-[#00AEEF]/60 rounded-2xl p-4 md:p-6 shadow-[0_25px_70px_-20px_rgba(0,174,239,0.25)] flex flex-col h-[68vh] min-h-[420px] md:h-120 backdrop-blur-2xl">
 
           {/* Orian "A" mark, watermarked centered behind the card content */}
           <img
             src="/logo-icon.png"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-96 md:h-96 object-contain opacity-[0.28] z-0"
+            loading="lazy"
+            decoding="async"
+            className="pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-72 lg:w-96 md:h-72 lg:h-96 object-contain opacity-[0.28] z-0"
           />
 
           {/* Chat Stream */}
@@ -153,7 +156,7 @@ const AiAssistant = ({ showHeading = true }) => {
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                  className={`max-w-[88%] md:max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                     msg.sender === 'user'
                       ? 'bg-[#00AEEF] text-black font-medium rounded-tr-none'
                       : 'bg-[var(--surface-strong)]/80 text-[var(--text-soft)] border border-[var(--border)] rounded-tl-none'
@@ -172,8 +175,10 @@ const AiAssistant = ({ showHeading = true }) => {
             )}
           </div>
 
-          {/* Prompt Chips */}
-          <div className="relative z-10 my-4 flex flex-wrap gap-2 pt-3 border-t border-[var(--border)]">
+          {/* Prompt Chips — desktop only; removed on mobile per request, where
+              the smaller viewport makes a card look cramped, so phones jump
+              straight from the chat stream to the input. */}
+          <div className="hidden md:flex relative z-10 my-4 flex-wrap gap-2 pt-3 border-t border-[var(--border)]">
             {quickQuestions.map((q, idx) => (
               <button
                 key={idx}
@@ -184,6 +189,8 @@ const AiAssistant = ({ showHeading = true }) => {
               </button>
             ))}
           </div>
+
+          <div className="md:hidden relative z-10 border-t border-[var(--border)] mt-1 mb-3" />
 
           {/* Form Input */}
           <form
@@ -200,9 +207,11 @@ const AiAssistant = ({ showHeading = true }) => {
             <button
               type="submit"
               disabled={isTyping}
-              className="bg-[#00AEEF] hover:bg-[#E8A23D] text-black font-semibold px-5 py-3 rounded-xl text-sm transition-all duration-300 shadow-[0_0_10px_rgba(0,174,239,0.3)] disabled:opacity-50"
+              aria-label="Send message"
+              className="tap-feedback flex items-center justify-center gap-1.5 bg-[#00AEEF] hover:bg-[#E8A23D] active:scale-95 text-black font-semibold rounded-xl text-sm transition-all duration-300 shadow-[0_0_10px_rgba(0,174,239,0.3)] disabled:opacity-50 w-12 h-12 shrink-0 md:w-auto md:h-auto md:px-5 md:py-3"
             >
-              Send
+              <Send className="w-5 h-5 md:hidden" />
+              <span className="hidden md:inline">Send</span>
             </button>
           </form>
 

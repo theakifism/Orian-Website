@@ -51,13 +51,16 @@ const ParticleNetworkBG: React.FC<ParticleNetworkBGProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Treat phones the same as prefers-reduced-motion: a full-page
-    // requestAnimationFrame loop doing O(n²) link checks every frame is
-    // the single biggest source of scroll jank on low-end mobile GPUs,
-    // and it's purely decorative. Draw one static frame instead.
-    const prefersReducedMotion =
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-      window.matchMedia('(max-width: 768px)').matches;
+    // Respect the user's OS-level motion setting with a single static
+    // frame (genuinely no animation). Phones get their own lightweight
+    // *animated* path below — not a static frame — because a static
+    // frame only ever gets (re)painted once, and mobile browsers fire a
+    // `resize` event whenever the address bar collapses/expands on
+    // scroll; that resize used to clear the canvas with nothing left to
+    // repaint it, which is why the dots were disappearing after a small
+    // scroll. A cheap continuous loop sidesteps that entirely.
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
     let particles: Particle[] = [];
     let width = 0;
@@ -66,16 +69,28 @@ const ParticleNetworkBG: React.FC<ParticleNetworkBGProps> = ({
     let animationFrameId = 0;
     let isVisible = true;
 
+    // Mobile trims particle count, drops the O(n²) link-line pass and the
+    // shadow blur entirely — the three most expensive parts of each frame
+    // — so the loop stays cheap enough to run continuously instead of
+    // needing to fall back to a single frame.
+    const mobileDensity = density * 0.45;
+    const mobileMaxCount = 40;
+    const mobileSpeed = speed * 0.6;
+
     const makeParticles = () => {
       const area = width * height;
-      const targetCount = Math.round((area / 10000) * density);
-      const count = Math.max(24, Math.min(targetCount, 110));
+      const effectiveDensity = isMobile ? mobileDensity : density;
+      const targetCount = Math.round((area / 10000) * effectiveDensity);
+      const count = isMobile
+        ? Math.max(14, Math.min(targetCount, mobileMaxCount))
+        : Math.max(24, Math.min(targetCount, 110));
+      const effectiveSpeed = isMobile ? mobileSpeed : speed;
 
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * speed,
-        vy: (Math.random() - 0.5) * speed,
+        vx: (Math.random() - 0.5) * effectiveSpeed,
+        vy: (Math.random() - 0.5) * effectiveSpeed,
         r: Math.random() * 2 + 1.3,
       }));
     };
@@ -90,6 +105,44 @@ const ParticleNetworkBG: React.FC<ParticleNetworkBGProps> = ({
       canvas.style.height = `${height}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       makeParticles();
+      // A resize (including the address-bar-driven ones on mobile) wipes
+      // the canvas above — repaint immediately so reduced-motion users
+      // never end up staring at a blank background until the next frame.
+      if (prefersReducedMotion) drawStaticFrame();
+    };
+
+    const drawStaticFrame = () => {
+      ctx.clearRect(0, 0, width, height);
+      for (const p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${colorRgb}, 0.9)`;
+        ctx.shadowColor = `rgba(${colorRgb}, 0.8)`;
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    };
+
+    // Cheap per-frame draw used on mobile: move + draw dots only, no
+    // link-line pass, no per-particle shadow blur.
+    const stepMobile = () => {
+      if (!isVisible) {
+        animationFrameId = requestAnimationFrame(stepMobile);
+        return;
+      }
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = `rgba(${colorRgb}, 0.85)`;
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > width) p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      animationFrameId = requestAnimationFrame(stepMobile);
     };
 
     const step = () => {
@@ -148,20 +201,15 @@ const ParticleNetworkBG: React.FC<ParticleNetworkBGProps> = ({
     resize();
 
     if (prefersReducedMotion) {
-      // Draw a single static frame and stop — respects the user's setting
-      // while still showing the network instead of an empty background.
-      step();
-      cancelAnimationFrame(animationFrameId);
-      ctx.clearRect(0, 0, width, height);
-      for (const p of particles) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${colorRgb}, 0.9)`;
-        ctx.shadowColor = `rgba(${colorRgb}, 0.8)`;
-        ctx.shadowBlur = 6;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
+      // A single static frame — respects the user's OS setting while still
+      // showing the network instead of an empty background. `resize()`
+      // above already repaints this on every subsequent resize.
+      drawStaticFrame();
+    } else if (isMobile) {
+      // Minimal continuous drift — present top to bottom on every page,
+      // never a single static frame, but far lighter than the desktop
+      // version (no link lines, no glow, fewer/slower particles).
+      animationFrameId = requestAnimationFrame(stepMobile);
     } else {
       animationFrameId = requestAnimationFrame(step);
     }
@@ -181,7 +229,7 @@ const ParticleNetworkBG: React.FC<ParticleNetworkBGProps> = ({
       <canvas ref={canvasRef} className="block w-full h-full" />
       {/* Soft vignette so foreground text/cards stay readable */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_70%_at_50%_40%,transparent_0%,var(--bg)_92%)]" />
-    </div>
+    </div> 
   );
 };
 

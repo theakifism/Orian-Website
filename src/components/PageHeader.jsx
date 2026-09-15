@@ -10,8 +10,8 @@ import { Link } from 'react-router-dom';
  */
 const PageHeader = ({ eyebrow, title, gradientWord, subtitle, breadcrumbs = [], glowClass = 'bg-[#00AEEF]/10' }) => {
   return (
-    <section className="relative pt-40 pb-16 bg-transparent overflow-hidden">
-      <div className={`absolute top-10 left-10 w-96 h-96 ${glowClass} rounded-full blur-3xl pointer-events-none animate-pulse`} />
+    <section className="relative pt-24 md:pt-40 pb-10 md:pb-16 bg-transparent overflow-hidden">
+      <div className={`absolute top-10 left-10 w-56 h-56 md:w-96 md:h-96 ${glowClass} rounded-full blur-3xl pointer-events-none animate-pulse`} />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {breadcrumbs.length > 0 && (

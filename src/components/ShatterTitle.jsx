@@ -1,10 +1,27 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useScrollFX } from "../context/ScrollFXContext";
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
+const subscribeToReducedMotionPref = (callback) => {
+  const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (mql.addEventListener) {
+    mql.addEventListener('change', callback);
+    return () => mql.removeEventListener('change', callback);
+  }
+  mql.addListener(callback);
+  return () => mql.removeListener(callback);
+};
+const getReducedMotionPref = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/**
+ * This is a one-shot, per-character transform+opacity transition (no blur,
+ * no continuous loop) — cheap enough to run on phones too, so unlike most
+ * other decorative motion in this app it doesn't gate on the mobile-width
+ * `reduceMotion` flag from ScrollFXContext. It only skips for an actual
+ * `prefers-reduced-motion: reduce` OS setting.
+ */
 export default function ShatterTitle({ text = "ORIAN", caption }) {
   const wrapRef = useRef(null);
   const [assembled, setAssembled] = useState(false);
-  const { reduceMotion } = useScrollFX();
+  const prefersReducedMotion = useSyncExternalStore(subscribeToReducedMotionPref, getReducedMotionPref, () => false);
   const chars = text.split("");
 
   const offsets = useMemo(
@@ -19,7 +36,7 @@ export default function ShatterTitle({ text = "ORIAN", caption }) {
   );
 
   useEffect(() => {
-    if (reduceMotion) return undefined;
+    if (prefersReducedMotion) return undefined;
     const el = wrapRef.current;
     if (!el) return undefined;
     const observer = new IntersectionObserver(
@@ -28,11 +45,11 @@ export default function ShatterTitle({ text = "ORIAN", caption }) {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [reduceMotion]);
+  }, [prefersReducedMotion]);
 
-  // On mobile/reduce-motion, skip the fly-in-and-assemble effect entirely
-  // and just show the title already assembled and static.
-  const isAssembled = reduceMotion || assembled;
+  // Only a real OS-level reduce-motion preference skips the fly-in effect.
+  const isAssembled = prefersReducedMotion || assembled;
+  const reduceMotion = prefersReducedMotion;
 
   return (
     <section

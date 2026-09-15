@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sun, Moon, Bell, LogOut } from 'lucide-react';
 import Sidebar from './Sidebar';
+import MobileTabBar from './MobileTabBar';
 import MetricCard from './MetricCard';
 import RequestsTable from './RequestsTable';
 import VisitorsPanel from './VisitorsPanel';
@@ -172,10 +173,10 @@ const AdminDashboard = ({ admin }) => {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="border-b border-[var(--border)] px-6 py-4 flex items-center justify-between">
-          <div>
+        <header className="border-b border-[var(--border)] px-4 sm:px-6 py-4 flex items-center justify-between gap-3 flex-wrap">
+          <div className="min-w-0">
             <h1 className="text-lg font-bold capitalize">{tab}</h1>
-            <p className="text-xs text-[var(--text-dim)]">
+            <p className="text-xs text-[var(--text-dim)] truncate">
               Signed in as {admin?.name} ({admin?.email})
             </p>
           </div>
@@ -204,7 +205,7 @@ const AdminDashboard = ({ admin }) => {
           </div>
         </header>
 
-        <div className="flex-1 px-6 py-8 overflow-y-auto">
+        <div className="flex-1 px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8 overflow-y-auto overflow-x-hidden">
           {loadError && <p className="text-sm text-red-400 mb-4">{loadError}</p>}
 
           {tab === 'requests' && (
@@ -252,6 +253,8 @@ const AdminDashboard = ({ admin }) => {
           {tab === 'settings' && <SettingsPanel admin={admin} />}
         </div>
       </div>
+
+      <MobileTabBar tab={tab} onTabChange={setTab} newCount={requestData?.newCount || 0} />
     </div>
   );
 };

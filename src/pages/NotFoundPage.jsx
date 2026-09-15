@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Seo from '../seo/Seo';
+import { notFoundMeta } from '../seo/pageMeta';
 import Interactive3DNetwork from '../components/Interactive3DNetwork';
 
 const NotFoundPage = () => {
   return (
     <section className="relative min-h-[70vh] flex items-center justify-center pt-32 pb-20 bg-transparent overflow-hidden">
+      <Seo title={notFoundMeta.title} description={notFoundMeta.description} path={notFoundMeta.path} noindex />
       <div className="max-w-2xl mx-auto px-6 text-center relative z-10 space-y-6">
         <Interactive3DNetwork size={220} className="mx-auto" />
         <span className="text-xs font-mono tracking-widest text-[#E8A23D] uppercase">404</span>

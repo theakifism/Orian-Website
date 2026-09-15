@@ -1,6 +1,8 @@
 import React from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
+import Seo from '../seo/Seo';
+import { buildWhyUsMeta } from '../seo/dynamicMeta';
 import { getWhyUsBySlug, whyUsData } from '../data/whyUs';
 import { HeadsetIcon, TagIcon, ShieldCheckIcon, BoltIcon, TowerIcon, TrendUpIcon, CheckCircleIcon } from '../components/CardIcons';
 
@@ -23,9 +25,11 @@ const WhyUsDetailPage = () => {
 
   const Icon = iconMap[reason.icon] || ShieldCheckIcon;
   const others = whyUsData.filter((w) => w.slug !== reason.slug);
+  const meta = buildWhyUsMeta(reason);
 
   return (
     <>
+      <Seo title={meta.title} description={meta.description} path={`/why-us/${reason.slug}`} />
       <PageHeader
         eyebrow={`Reason ${reason.id}`}
         title={reason.title}

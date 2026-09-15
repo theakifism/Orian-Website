@@ -8,10 +8,12 @@ import { useScrollFX } from '../context/ScrollFXContext';
  * tilts back into place, and content entering while scrolling up settles
  * down and tilts forward into place.
  *
- * On mobile (see ScrollFXContext's `reduceMotion`) none of this runs: no
- * IntersectionObserver, no blur/transform/transition, content is just
- * rendered in its final state immediately. That's what was causing sections
- * to sit blank for a couple of scroll-lengths on phones before popping in.
+ * On mobile (see ScrollFXContext's `reduceMotion`) the full 3D blur/tilt
+ * version is skipped -- it still runs an IntersectionObserver, but applies
+ * the much cheaper `.reveal-mobile` treatment instead (opacity + a short
+ * rise, no blur, no perspective/rotateX). That keeps phones feeling as
+ * alive as desktop on scroll without reintroducing the paint cost that
+ * made the full effect jank on low-end hardware.
  */
 const Reveal = ({
   children,
@@ -29,8 +31,6 @@ const Reveal = ({
   const enterDirection = useRef(direction);
 
   useEffect(() => {
-    if (reduceMotion) return undefined;
-
     const node = ref.current;
     if (!node) return undefined;
 
@@ -53,13 +53,17 @@ const Reveal = ({
     observer.observe(node);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [once, reduceMotion]);
+  }, [once]);
 
   if (reduceMotion) {
-    // No wrapper styling/animation at all -- just the plain tag so content
-    // is visible immediately and scrolling never has to wait on it.
+    // Mobile: cheap opacity + rise only -- see `.reveal-mobile` in index.css.
     return (
-      <Tag className={className} {...rest}>
+      <Tag
+        ref={ref}
+        style={{ transitionDelay: inView ? `${delay}ms` : '0ms' }}
+        className={`reveal-mobile ${inView ? 'in-view' : ''} ${className}`}
+        {...rest}
+      >
         {children}
       </Tag>
     );

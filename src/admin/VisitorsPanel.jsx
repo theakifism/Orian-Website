@@ -162,50 +162,90 @@ const VisitorsPanel = ({ visitorData, loading }) => {
           ))}
         </div>
       ) : (
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-[var(--text-faint)] text-xs font-mono uppercase tracking-wider border-b border-[var(--border)]">
-                <th className="px-4 py-3">Visitor</th>
-                <th className="px-4 py-3">IP address</th>
-                <th className="px-4 py-3">Location</th>
-                <th className="px-4 py-3">Device</th>
-                <th className="px-4 py-3">Visits</th>
-                <th className="px-4 py-3">First seen</th>
-                <th className="px-4 py-3">Last seen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visitorData?.visitors.map((v) => (
-                <tr key={v.visitor_id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--overlay)] transition-colors">
-                  <td className="px-4 py-3 font-mono text-xs text-[var(--text-dim)]">{v.visitor_id.slice(0, 10)}…</td>
-                  <td className="px-4 py-3 font-mono">{v.last_ip || '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className="mr-1">{countryFlag(v.last_country)}</span>
-                    {v.last_city ? `${v.last_city}, ` : ''}
-                    {v.last_country || 'Unknown'}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-dim)]">
-                    <p>{v.last_device || 'Unknown'}</p>
-                    <p className="text-[10px] text-[var(--text-faint)]">
-                      {[v.last_browser, v.last_os].filter(Boolean).join(' · ') || '—'}
+        <>
+          <div className="hidden md:block bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-[var(--text-faint)] text-xs font-mono uppercase tracking-wider border-b border-[var(--border)]">
+                  <th className="px-4 py-3">Visitor</th>
+                  <th className="px-4 py-3">IP address</th>
+                  <th className="px-4 py-3">Location</th>
+                  <th className="px-4 py-3">Device</th>
+                  <th className="px-4 py-3">Visits</th>
+                  <th className="px-4 py-3">First seen</th>
+                  <th className="px-4 py-3">Last seen</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visitorData?.visitors.map((v) => (
+                  <tr key={v.visitor_id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--overlay)] transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--text-dim)]">{v.visitor_id.slice(0, 10)}…</td>
+                    <td className="px-4 py-3 font-mono">{v.last_ip || '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className="mr-1">{countryFlag(v.last_country)}</span>
+                      {v.last_city ? `${v.last_city}, ` : ''}
+                      {v.last_country || 'Unknown'}
+                    </td>
+                    <td className="px-4 py-3 text-[var(--text-dim)]">
+                      <p>{v.last_device || 'Unknown'}</p>
+                      <p className="text-[10px] text-[var(--text-faint)]">
+                        {[v.last_browser, v.last_os].filter(Boolean).join(' · ') || '—'}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3 font-semibold">{v.visit_count}</td>
+                    <td className="px-4 py-3 text-[var(--text-dim)]">{formatDate(v.first_seen)}</td>
+                    <td className="px-4 py-3 text-[var(--text-dim)]">{formatDate(v.last_seen)}</td>
+                  </tr>
+                ))}
+                {visitorData && visitorData.visitors.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-[var(--text-dim)]">
+                      No visits recorded yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile: cards instead of a 7-column table that needed horizontal
+              scrolling to read past "Visitor" and "IP address". */}
+          <div className="md:hidden space-y-3">
+            {visitorData?.visitors.map((v) => (
+              <div key={v.visitor_id} className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs text-[var(--text-dim)]">{v.visitor_id.slice(0, 14)}…</p>
+                    <p className="text-sm mt-1">
+                      <span className="mr-1">{countryFlag(v.last_country)}</span>
+                      {v.last_city ? `${v.last_city}, ` : ''}
+                      {v.last_country || 'Unknown'}
                     </p>
-                  </td>
-                  <td className="px-4 py-3 font-semibold">{v.visit_count}</td>
-                  <td className="px-4 py-3 text-[var(--text-dim)]">{formatDate(v.first_seen)}</td>
-                  <td className="px-4 py-3 text-[var(--text-dim)]">{formatDate(v.last_seen)}</td>
-                </tr>
-              ))}
-              {visitorData && visitorData.visitors.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-[var(--text-dim)]">
-                    No visits recorded yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-semibold text-sm">{v.visit_count}</p>
+                    <p className="text-[10px] text-[var(--text-faint)]">visits</p>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-[var(--border)] grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs text-[var(--text-dim)]">
+                  <p><span className="text-[var(--text-faint)]">IP:</span> <span className="font-mono">{v.last_ip || '—'}</span></p>
+                  <p><span className="text-[var(--text-faint)]">Device:</span> {v.last_device || 'Unknown'}</p>
+                  <p className="col-span-2">
+                    <span className="text-[var(--text-faint)]">Browser/OS:</span>{' '}
+                    {[v.last_browser, v.last_os].filter(Boolean).join(' · ') || '—'}
+                  </p>
+                  <p><span className="text-[var(--text-faint)]">First seen:</span> {formatDate(v.first_seen)}</p>
+                  <p><span className="text-[var(--text-faint)]">Last seen:</span> {formatDate(v.last_seen)}</p>
+                </div>
+              </div>
+            ))}
+            {visitorData && visitorData.visitors.length === 0 && (
+              <div className="text-center text-[var(--text-dim)] py-8 bg-[var(--surface)] border border-[var(--border)] rounded-xl">
+                No visits recorded yet.
+              </div>
+            )}
+          </div>
+        </>
       )}
     </>
   );

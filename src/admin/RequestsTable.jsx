@@ -253,7 +253,7 @@ const RequestsTable = ({
         </div>
       </div>
 
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-x-auto">
+      <div className="hidden md:block bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="sticky top-0 bg-[var(--surface)] z-10">
             <tr className="text-left text-[var(--text-faint)] text-xs font-mono uppercase tracking-wider border-b border-[var(--border)]">
@@ -402,6 +402,115 @@ const RequestsTable = ({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile: stacked cards instead of a table that needed horizontal
+          scrolling to read past 2-3 columns on a phone screen. */}
+      <div className="md:hidden space-y-3">
+        {sorted.map((r) => {
+          const noteCount = Array.isArray(r.notes) ? r.notes.length : 0;
+          const isExpanded = expandedId === r.id;
+          return (
+            <div key={r.id} className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={selected.has(r.id)}
+                  onChange={() => toggleSelect(r.id)}
+                  aria-label={`Select request from ${r.name}`}
+                  className="mt-1.5 shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{r.name}</p>
+                      <p className="text-xs text-[var(--text-dim)] truncate">{r.email}</p>
+                    </div>
+                    <StatusBadge status={r.status} />
+                  </div>
+                  {r.company && <p className="text-xs text-[var(--text-faint)] mt-0.5">{r.company}</p>}
+                  <p className="text-[11px] text-[var(--text-faint)] mt-2">
+                    {formatDate(r.created_at)} · {r.requirement_type || 'No requirement type'}
+                  </p>
+                  <p className="text-sm text-[var(--text-dim)] mt-2 leading-relaxed">{r.message}</p>
+
+                  <div className="flex items-center gap-2 mt-3 flex-wrap">
+                    <select
+                      value={r.status}
+                      onChange={(e) => onUpdateStatus(r.id, e.target.value)}
+                      className="bg-[var(--overlay)] border border-[var(--border)] rounded-lg px-2 py-2 text-xs flex-1 min-w-[110px]"
+                    >
+                      <option value="new">New</option>
+                      <option value="contacted">Contacted</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                    <select
+                      value={r.assigned_to || ''}
+                      onChange={(e) => onAssign(r.id, e.target.value || null)}
+                      className="bg-[var(--overlay)] border border-[var(--border)] rounded-lg px-2 py-2 text-xs flex-1 min-w-[110px]"
+                    >
+                      <option value="">Unassigned</option>
+                      {admins.map((a) => (
+                        <option key={a.id} value={a.id}>{a.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => openNotes(r)}
+                    className={`tap-feedback flex items-center gap-1.5 text-xs mt-3 px-2 py-1.5 -mx-2 rounded-md transition-colors ${
+                      noteCount > 0 ? 'text-[#00AEEF]' : 'text-[var(--text-faint)]'
+                    }`}
+                  >
+                    <MessageSquarePlus size={14} />
+                    {noteCount > 0 ? `${noteCount} note${noteCount === 1 ? '' : 's'}` : 'Add note'}
+                    {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                  </button>
+
+                  {isExpanded && (
+                    <div className="mt-2 bg-[var(--overlay)]/60 border border-[var(--border)] rounded-lg p-3">
+                      <div className="space-y-2 mb-3 max-h-40 overflow-y-auto">
+                        {noteCount === 0 && (
+                          <p className="text-xs text-[var(--text-faint)] italic">No notes yet.</p>
+                        )}
+                        {(r.notes || []).map((n, idx) => (
+                          <div key={idx} className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2">
+                            <p className="text-sm">{n.text}</p>
+                            <p className="text-[10px] text-[var(--text-faint)] mt-1">
+                              {n.author} · {formatDate(n.at)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={noteDraft}
+                          onChange={(e) => setNoteDraft(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && submitNote(r.id)}
+                          placeholder='e.g. "Called, no answer — retry Friday"'
+                          className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00AEEF]"
+                        />
+                        <button
+                          onClick={() => submitNote(r.id)}
+                          disabled={savingNote || !noteDraft.trim()}
+                          className="tap-feedback bg-[#00AEEF] hover:bg-[#E8A23D] text-black text-xs font-semibold px-3 py-2 rounded-lg transition-colors disabled:opacity-50 shrink-0"
+                        >
+                          {savingNote ? 'Saving…' : 'Add'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        {sorted.length === 0 && (
+          <div className="text-center text-[var(--text-dim)] py-10 bg-[var(--surface)] border border-[var(--border)] rounded-xl">
+            No requests match these filters.
+          </div>
+        )}
       </div>
     </div>
   );

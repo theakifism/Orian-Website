@@ -1,11 +1,14 @@
 import React from 'react';
 import PageHeader from '../components/PageHeader';
+import Seo from '../seo/Seo';
+import { pageMeta } from '../seo/pageMeta';
 import Services from '../components/Services';
 import Interactive3DNetwork from '../components/Interactive3DNetwork';
 
 const ServicesPage = () => {
   return (
     <>
+      <Seo title={pageMeta.services.title} description={pageMeta.services.description} path={pageMeta.services.path} />
       <PageHeader
         eyebrow="Our Offerings"
         title="Four channels,"

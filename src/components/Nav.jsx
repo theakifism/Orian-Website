@@ -3,7 +3,6 @@ import { Link, NavLink } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 
 const navLinks = [
-  { name: 'Home', href: '/' },
   { name: 'Why us', href: '/why-us' },
   { name: 'Services', href: '/services' },
   { name: 'Industries', href: '/industries' },
@@ -83,30 +82,67 @@ const Nav = ({ theme, onToggleTheme }) => {
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="text-[var(--text-soft)] hover:text-[var(--text)] focus:outline-none p-2"
+            className="tap-feedback text-[var(--text-soft)] hover:text-[var(--text)] focus:outline-none p-2 active:scale-90 transition-transform duration-150"
             aria-label="Toggle Menu"
+            aria-expanded={isOpen}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                className="transition-all duration-300 origin-center"
+                style={{
+                  transform: isOpen ? 'translateY(6px) rotate(45deg)' : 'none',
+                }}
+                d="M4 6h16"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                className="transition-opacity duration-200"
+                style={{ opacity: isOpen ? 0 : 1 }}
+                d="M4 12h16"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                className="transition-all duration-300 origin-center"
+                style={{
+                  transform: isOpen ? 'translateY(-6px) rotate(-45deg)' : 'none',
+                }}
+                d="M4 18h16"
+              />
             </svg>
           </button>
         </div>
       </div>
 
-      {isOpen && (
-        <div className="md:hidden bg-[var(--bg)] border-b border-[var(--border)] px-6 py-6 space-y-4">
-          {navLinks.map((link) => (
+      {/* Mobile menu: kept mounted (not conditionally rendered) so it can
+          animate both open AND closed via a max-height + fade transition,
+          instead of just popping in/out with no motion. Links stagger in
+          with a short translateX + fade, offset a few ms apart. */}
+      <div
+        id="mobile-menu"
+        className={`md:hidden overflow-hidden bg-[var(--bg)]/95 backdrop-blur-md border-b border-[var(--border)] transition-[max-height,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          isOpen ? 'max-h-[32rem] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="px-6 py-6 space-y-1">
+          {navLinks.map((link, idx) => (
             <NavLink
               key={link.name}
               to={link.href}
               end={link.href === '/'}
               onClick={() => setIsOpen(false)}
+              tabIndex={isOpen ? 0 : -1}
+              style={{ transitionDelay: isOpen ? `${idx * 40}ms` : '0ms' }}
               className={({ isActive }) =>
-                `block text-base transition-colors ${isActive ? 'text-[#00AEEF]' : 'text-[var(--text-soft)] hover:text-[#00AEEF]'}`
+                `tap-feedback block text-base py-2.5 transition-all duration-300 ${
+                  isActive ? 'text-[#00AEEF]' : 'text-[var(--text-soft)] hover:text-[#00AEEF]'
+                } ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-3'}`
               }
             >
               {link.name}
@@ -115,12 +151,16 @@ const Nav = ({ theme, onToggleTheme }) => {
           <Link
             to="/assistant"
             onClick={() => setIsOpen(false)}
-            className="inline-flex items-center justify-center w-full px-5 py-3 text-xs font-semibold tracking-wider text-black bg-[#00AEEF] rounded-full shadow-[0_0_15px_rgba(0,174,239,0.4)]"
+            tabIndex={isOpen ? 0 : -1}
+            style={{ transitionDelay: isOpen ? `${navLinks.length * 40}ms` : '0ms' }}
+            className={`tap-feedback inline-flex items-center justify-center w-full mt-3 px-5 py-3.5 text-xs font-semibold tracking-wider text-black bg-[#00AEEF] rounded-full shadow-[0_0_15px_rgba(0,174,239,0.4)] transition-all duration-300 active:scale-[0.97] ${
+              isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-3'
+            }`}
           >
             GET STARTED
           </Link>
         </div>
-      )}
+      </div>
     </header>
   );
 };

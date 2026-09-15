@@ -2,6 +2,9 @@ import React from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import Accordion from '../components/Accordion';
+import Seo from '../seo/Seo';
+import { serviceMeta } from '../seo/pageMeta';
+import { serviceSchema, faqSchema } from '../seo/jsonld';
 import { getServiceBySlug, services } from '../data/services';
 import { industries } from '../data/industries';
 import { GatewayIcon, WaveformIcon, ShieldCheckIcon, ChatIcon, CheckCircleIcon } from '../components/CardIcons';
@@ -25,8 +28,21 @@ const ServiceDetailPage = () => {
   const relatedIndustries = industries.filter((i) => i.services.includes(service.slug)).slice(0, 4);
   const otherServices = services.filter((s) => s.slug !== service.slug);
 
+  // Falls back to auto-generated copy if this slug isn't in the
+  // hand-tuned serviceMeta map yet (e.g. a newly added service).
+  const meta = serviceMeta[service.slug] || {
+    title: `${service.title} | Orian Teleservices`.slice(0, 60),
+    description: service.desc,
+  };
+
   return (
     <>
+      <Seo
+        title={meta.title}
+        description={meta.description}
+        path={`/services/${service.slug}`}
+        jsonLd={[serviceSchema(service), faqSchema(service.faqs)]}
+      />
       <PageHeader
         eyebrow="Service"
         title={service.title}

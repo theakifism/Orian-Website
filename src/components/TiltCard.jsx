@@ -10,10 +10,11 @@ import { useScrollFX } from '../context/ScrollFXContext';
  * keep working exactly as before -- this wrapper never sets a transform on
  * the card element itself, only on the wrapping divs around it.
  *
- * On mobile (`reduceMotion` from ScrollFXContext) this renders the children
- * directly with no observer, no mouse-tilt listeners, and no pop-in
- * transform/blur -- cards are simply visible immediately instead of
- * appearing blank until scrolled further into view.
+ * On mobile (`reduceMotion` from ScrollFXContext) there's no mouse-tilt
+ * (no cursor to drive it) and no blur -- but the card still fades and rises
+ * into place on scroll via the shared `.reveal-mobile` treatment (see
+ * index.css), staggered using the same `delay` prop callers already pass
+ * in for the desktop pop-in, so grids of cards still feel sequenced.
  */
 const TiltCard = ({
   children,
@@ -48,8 +49,6 @@ const TiltCard = ({
   }, [inView, hasEntered, delay, reduceMotion]);
 
   useEffect(() => {
-    if (reduceMotion) return undefined;
-
     const node = outerRef.current;
     if (!node) return undefined;
 
@@ -69,10 +68,18 @@ const TiltCard = ({
     observer.observe(node);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [once, reduceMotion]);
+  }, [once]);
 
   if (reduceMotion) {
-    return <div className={className}>{children}</div>;
+    return (
+      <div
+        ref={outerRef}
+        className={`reveal-mobile ${inView ? 'in-view' : ''} ${className}`}
+        style={{ transitionDelay: inView ? `${delay}ms` : '0ms' }}
+      >
+        {children}
+      </div>
+    );
   }
 
   const handleMouseMove = (e) => {

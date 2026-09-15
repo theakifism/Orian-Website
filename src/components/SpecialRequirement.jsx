@@ -204,6 +204,8 @@ const SpecialRequirement = () => {
             src="/logo-icon.png"
             alt=""
             aria-hidden="true"
+            loading="lazy"
+            decoding="async"
             className="pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 md:w-[26rem] md:h-[26rem] object-contain opacity-[0.28] z-0"
           />
 

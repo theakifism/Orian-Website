@@ -1,12 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
+import Seo from '../seo/Seo';
+import { pageMeta } from '../seo/pageMeta';
 import TiltCard from '../components/TiltCard';
+import AnimatedIconBadge from '../components/AnimatedIconBadge';
 import { industries } from '../data/industries';
+
+const INDUSTRY_ACCENTS = ['#00AEEF', '#A855F7', '#E8A23D'];
 
 const IndustriesPage = () => {
   return (
     <>
+      <Seo title={pageMeta.industries.title} description={pageMeta.industries.description} path={pageMeta.industries.path} />
       <PageHeader
         eyebrow="Sectors We Serve"
         title="Messaging tuned for"
@@ -24,6 +30,16 @@ const IndustriesPage = () => {
                   to={`/industries/${industry.slug}`}
                   className={`block h-full p-6 bg-[var(--surface)]/90 border border-[var(--border)] rounded-2xl backdrop-blur-xl transition-all duration-300 group ${industry.hover}`}
                 >
+                  <AnimatedIconBadge
+                    color={INDUSTRY_ACCENTS[idx % INDUSTRY_ACCENTS.length]}
+                    size="sm"
+                    className="mb-3 transition-transform duration-300 group-hover:scale-110"
+                  >
+                    <span
+                      className="w-2.5 h-2.5 rounded-full"
+                      style={{ backgroundColor: INDUSTRY_ACCENTS[idx % INDUSTRY_ACCENTS.length] }}
+                    />
+                  </AnimatedIconBadge>
                   <h3 className="text-lg font-bold text-[var(--text)] mb-2">{industry.name}</h3>
                   <p className="text-[var(--text-dim)] text-xs leading-relaxed group-hover:text-[var(--text-soft)] transition-colors">
                     {industry.blurb}

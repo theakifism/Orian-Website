@@ -8,17 +8,9 @@ const DEFAULT_RINGS = [
 ];
 
 const BASE_TILT_X = -14;
-const HOVER_RANGE = 20; // degrees of parallax tilt the cursor can pull toward
-const LERP = 0.09; // how quickly the tilt eases toward the cursor each frame
+const HOVER_RANGE = 20; 
+const LERP = 0.09; 
 
-/**
- * A 3D "gyroscope" built from pure CSS 3D transforms (perspective +
- * preserve-3d) — no WebGL/three.js dependency. It's cursor-controlled:
- * just move the mouse anywhere over it and the whole assembly leans toward
- * the pointer, like it's watching you. Click-and-drag (or touch-drag) lets
- * you spin it freely instead. Release, or move the mouse away, and it eases
- * back into a slow ambient auto-rotation.
- */
 const Interactive3DNetwork = ({
   className = '',
   size = 300,
@@ -29,14 +21,10 @@ const Interactive3DNetwork = ({
   const sceneRef = useRef(null);
   const wrapRef = useRef(null);
 
-  // Continuous ambient spin around Y, always advancing (paused only while
-  // free-dragging, since dragging takes over Y directly).
   const autoSpinY = useRef(28);
-  // Where the cursor "wants" the tilt to be (parallax offset added on top
-  // of the base tilt / auto-spin).
+  
   const hoverTarget = useRef({ x: 0, y: 0 });
-  // Where the tilt currently is — eased toward hoverTarget every frame so
-  // it never snaps.
+  
   const hoverCurrent = useRef({ x: 0, y: 0 });
 
   const dragging = useRef(false);
@@ -70,12 +58,15 @@ const Interactive3DNetwork = ({
       if (frameId.current) cancelAnimationFrame(frameId.current);
       window.clearTimeout(resumeTimer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [reduceMotion]);
 
-  // Hover parallax — fires on every mouse move over the diagram, no click
-  // needed. Cursor position within the box maps directly to tilt.
   const handlePointerMove = (e) => {
+    // Touch input never drives the tilt/drag — only mouse/pen. This keeps
+    // the diagram purely decorative on touch devices so a finger landing on
+    // it always scrolls the page instead of getting captured by the widget.
+    if (e.pointerType === 'touch') return;
+
     if (dragging.current) {
       const dx = e.clientX - lastPointer.current.x;
       const dy = e.clientY - lastPointer.current.y;
@@ -95,10 +86,9 @@ const Interactive3DNetwork = ({
     hoverTarget.current = { x: 0, y: 0 };
   };
 
-  // Click-and-drag (mouse) or touch-drag: free, unclamped spin instead of
-  // the gentle hover parallax — useful on touch devices, which have no
-  // hover state at all.
+
   const handlePointerDown = (e) => {
+    if (e.pointerType === 'touch') return;
     dragging.current = true;
     lastPointer.current = { x: e.clientX, y: e.clientY };
     e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -121,7 +111,7 @@ const Interactive3DNetwork = ({
 
       <div
         ref={wrapRef}
-        className="relative mx-auto cursor-grab active:cursor-grabbing touch-none"
+        className="relative mx-auto cursor-grab active:cursor-grabbing"
         style={{ width: size, height: size, perspective: '1200px' }}
         onPointerMove={handlePointerMove}
         onPointerDown={handlePointerDown}
@@ -132,7 +122,7 @@ const Interactive3DNetwork = ({
         }}
         onPointerCancel={endDrag}
         role="img"
-        aria-label="Interactive 3D diagram of Orian's global network — move your cursor over it, or drag to spin"
+        aria-label="Interactive 3D diagram of Orian's global network"
       >
         <div
           ref={sceneRef}
@@ -176,8 +166,8 @@ const Interactive3DNetwork = ({
             );
           })}
 
-          {/* Ambient glow behind the center mark, lifted toward the viewer */}
-          <div
+
+        <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#00AEEF]/25 blur-2xl orbit-glow-pulse"
             style={{ width: px(0.28), height: px(0.28), transform: 'translateZ(36px)' }}
           />
@@ -193,7 +183,7 @@ const Interactive3DNetwork = ({
       {legend.length > 0 && (
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mt-6">
           {legend.map((item, idx) => (
-            <span key={idx} className="inline-flex items-center gap-2 text-xs font-mono text-[var(--text-dim)]">
+            <span key={idx} className="inline-flex items-center gap-2 text-xs font-mono text-(--text-dim)">
               <span
                 className="w-2 h-2 rounded-full"
                 style={{ backgroundColor: item.color, boxShadow: `0 0 8px ${item.color}` }}
@@ -203,10 +193,6 @@ const Interactive3DNetwork = ({
           ))}
         </div>
       )}
-
-      <p className="text-center text-[10px] font-mono text-[var(--text-faint)] mt-3 tracking-wide uppercase">
-        Move your cursor to look around &middot; drag to spin free
-      </p>
     </div>
   );
 };
