@@ -144,8 +144,8 @@ export default async function handler(req, res) {
 
     // Primary model first; if Gemini says 429/503 (quota or overloaded) after retries,
     // try a fallback model before giving up. Models are configurable from Vercel env vars.
-    const PRIMARY_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-    const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || 'gemini-2.5-flash';
+    const PRIMARY_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+    const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.6-flash';
 
     const baseConfig = { systemInstruction: SYSTEM_INSTRUCTION, maxOutputTokens: 500 };
     let stream;
@@ -162,7 +162,7 @@ export default async function handler(req, res) {
       );
     } catch (primaryErr) {
       console.error(`Gemini primary model (${PRIMARY_MODEL}) failed:`, primaryErr?.status, primaryErr?.message);
-      if (!isGeminiOverloaded(primaryErr) || !FALLBACK_MODEL || FALLBACK_MODEL === PRIMARY_MODEL) throw primaryErr;
+      if (!(isGeminiOverloaded(primaryErr) || primaryErr?.status === 404) || !FALLBACK_MODEL || FALLBACK_MODEL === PRIMARY_MODEL) throw primaryErr;
       try {
         stream = await generateContentStreamWithRetry(
           ai,
