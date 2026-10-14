@@ -155,14 +155,17 @@ export default async function handler(req, res) {
         {
           model: PRIMARY_MODEL,
           contents,
-          // Minimal thinking = much faster first word for short chat answers.
-          config: { ...baseConfig, thinkingConfig: { thinkingLevel: 'minimal' } },
+          // Optional: set GEMINI_THINKING_LEVEL (e.g. 'low') in Vercel to speed up replies.
+          // Left unset by default because not every model supports every level.
+          config: process.env.GEMINI_THINKING_LEVEL
+            ? { ...baseConfig, thinkingConfig: { thinkingLevel: process.env.GEMINI_THINKING_LEVEL } }
+            : baseConfig,
         },
         { retries: 1 },
       );
     } catch (primaryErr) {
       console.error(`Gemini primary model (${PRIMARY_MODEL}) failed:`, primaryErr?.status, primaryErr?.message);
-      if (!(isGeminiOverloaded(primaryErr) || primaryErr?.status === 404) || !FALLBACK_MODEL || FALLBACK_MODEL === PRIMARY_MODEL) throw primaryErr;
+      if (!(isGeminiOverloaded(primaryErr) || primaryErr?.status === 404 || primaryErr?.status === 400) || !FALLBACK_MODEL || FALLBACK_MODEL === PRIMARY_MODEL) throw primaryErr;
       try {
         stream = await generateContentStreamWithRetry(
           ai,
