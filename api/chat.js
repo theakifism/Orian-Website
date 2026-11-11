@@ -8,6 +8,15 @@ import { findBlock } from './_lib/blocklist.js';
 const MAX_ATTEMPTS_PER_IP = 30;
 const WINDOW_SECONDS = 10 * 60;
 const localAttemptsByIp = new Map();
+const COMPANY_SCOPE_PATTERN = /\b(?:orian(?: teleservices)?|business messaging|bulk\s*sms|business sms|\bsms\b|\botp\b|\bdlt\b|\btrai\b|sender\s*id|header|message\s+template|transactional sms|promotional sms|delivery report|(?:sms|otp|message) delivery|delivery rate|platform uptime|operator route|message routing|throughput|sms api|messaging api|\bsmp\b|webhook|sandbox api|whatsapp business|whatsapp api|voice sms|\bivr\b|social media handling|it solutions|cloud hosting|business network|helpdesk|24/7 support|support desk|contact (?:the )?team|sales team|onboard(?:ing)?|setup time|setup process|first (?:live )?send|our services|your services|your company|about orian|our pricing|your pricing|service pricing|message pricing|phone number|support email)\b/i;
+const CODE_SUPPORT_PATTERN = /\b(?:code|coding|programming|debug(?:ging)?|terminal|command line|stack trace|traceback|compiler|compile|npm|node\.?js|python|javascript|typescript|powershell|bash|shell|segmentation fault|package\.json)\b|\b(?:syntaxerror|typeerror|referenceerror|modulenotfounderror|cannot find module|npm err!)\b|\bat\s+[^\s]+\s+\([^\n]*:\d+:\d+\)/i;
+const OUT_OF_SCOPE_REPLY = "I can only help with Orian and its services, so I can’t debug general code or terminal errors. For help setting up Orian’s messaging API, see the Developers page or contact support@orian.in.";
+
+function isCompanyQuestion(text) {
+  return typeof text === 'string'
+    && !CODE_SUPPORT_PATTERN.test(text)
+    && COMPANY_SCOPE_PATTERN.test(text);
+}
 
 const SYSTEM_INSTRUCTION = `
 You are Orian AI, the chat assistant on the Orian Teleservices website. You talk like a friendly, knowledgeable person from the Orian team, not like a brochure or a robot.
@@ -42,6 +51,7 @@ Contact: phone +91 95525 56786, sales email orianteleservices@gmail.com, support
 Sectors served include banking, corporates, data centers, education, healthcare, hotels and hospitality, IT services, manufacturing, media and entertainment, real estate, retail, telecom and more.
 
 LIMITS
+- Your scope is only Orian Teleservices, its company information, and its messaging, voice, WhatsApp, compliance and digital services. Do not answer general programming, code, terminal, or unrelated questions, even if the visitor pastes logs or asks politely. For those, use the fixed out-of-scope reply supplied by the server.
 - Only state facts listed above. If you're asked about things you don't have, like exact pricing, specific contract terms, account details or a guarantee, be honest about it in a natural way (for example, "pricing depends on your volume, so the team will quote you properly") and offer the phone number or the Contact form.
 - Never invent numbers, client names, or promises.
 - Do not infer benefits such as "no delays" or guaranteed delivery unless they are explicitly listed above. If a detail is uncertain, say so plainly instead of guessing.
@@ -119,6 +129,18 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: '"history" must be an array' });
     }
 
+    // Enforce the assistant's company-only scope before calling Groq. This
+    // keeps pasted terminal errors and general programming questions from
+    // receiving a general-purpose answer or consuming AI quota.
+    if (!isCompanyQuestion(message)) {
+      res.writeHead(200, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        'X-Content-Type-Options': 'nosniff',
+      });
+      return res.end(OUT_OF_SCOPE_REPLY);
+    }
+
     // Only the last few turns are sent: every extra turn is more tokens the
     // model has to read before it can start writing a reply, and for a
     // chat-widget FAQ assistant the recent turns carry almost all the
@@ -129,6 +151,7 @@ export default async function handler(req, res) {
     // Convert the conversation into OpenAI-compatible chat messages.
     const contents = history
       .filter((m) => m && typeof m.text === 'string' && m.text.length <= MAX_HISTORY_MESSAGE_LENGTH)
+      .filter((m) => isCompanyQuestion(m.text))
       .slice(-MAX_HISTORY_TURNS)
       .map((m) => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
