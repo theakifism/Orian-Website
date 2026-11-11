@@ -1,0 +1,100 @@
+/* =====================================================================
+   Admin panel layout - mirrors the public site (src/styles/o2*.css):
+   same palette, Geist type, pill navigation, 24px cards, one accent.
+   Everything is scoped under .ad so nothing leaks into the website.
+   ===================================================================== */
+
+.ad { min-height: 100svh; background: var(--o-bg); color: var(--o-text); }
+
+/* ---------- top bar (same recipe as .o2-nav) ---------- */
+.ad-top {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 4.25rem;
+  background: rgba(10, 11, 13, 0.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--o-line);
+}
+.ad-top-in { height: 100%; max-width: 80rem; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.ad-brand { display: inline-flex; align-items: center; gap: 0.7rem; height: 100%; text-decoration: none; color: inherit; }
+.ad-brand img { height: 2.1rem; width: auto; }
+.ad-brand-tag { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--o-accent); border: 1px solid rgba(0, 174, 239, 0.35); border-radius: 999px; padding: 0.15rem 0.55rem; }
+.ad-tabs { display: none; align-items: center; gap: 0.15rem; }
+@media (min-width: 1100px) { .ad-tabs { display: flex; } }
+.ad-tab {
+  position: relative; display: inline-flex; align-items: center; gap: 0.45rem; height: 2.3rem; padding: 0 0.85rem; border-radius: 999px;
+  font-size: 0.9rem; font-weight: 600; color: var(--o-text-2); background: transparent; border: 0; cursor: pointer; font-family: inherit;
+  transition: color var(--o-dur-s) var(--o-ease), background-color var(--o-dur-s) var(--o-ease);
+}
+.ad-tab:hover, .ad-tab[aria-current='page'] { color: var(--o-text); background: var(--o-surface-2); }
+.ad-tab[aria-current='page'] { box-shadow: inset 0 0 0 1px var(--o-line-strong); }
+.ad-tab svg { width: 0.95rem; height: 0.95rem; }
+.ad-badge { min-width: 1.15rem; height: 1.15rem; padding: 0 0.3rem; border-radius: 999px; background: var(--o-accent); color: var(--o-on-accent); font-size: 0.68rem; font-weight: 700; display: inline-grid; place-items: center; }
+.ad-tools { display: flex; align-items: center; gap: 0.5rem; }
+.ad-tools .o2-btn { height: 2.4rem; padding: 0 1rem; font-size: 0.86rem; }
+.ad-user { display: none; text-align: right; line-height: 1.2; margin-right: 0.25rem; }
+@media (min-width: 1100px) { .ad-user { display: block; } }
+.ad-user b { display: block; font-size: 0.82rem; font-weight: 600; }
+.ad-user span { font-size: 0.72rem; color: var(--o-text-3); }
+
+/* ---------- phone bottom bar ---------- */
+.ad-bottom {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(16, 18, 22, 0.94); backdrop-filter: blur(14px); border-top: 1px solid var(--o-line);
+}
+@media (min-width: 1100px) { .ad-bottom { display: none; } }
+.ad-bottom button { position: relative; flex: 1; display: grid; justify-items: center; gap: 0.2rem; padding: 0.6rem 0 0.55rem; background: none; border: 0; color: var(--o-text-3); font: inherit; font-size: 0.66rem; font-weight: 600; cursor: pointer; }
+.ad-bottom button[aria-current='page'] { color: var(--o-accent); }
+.ad-bottom button[aria-current='page']::before { content: ''; position: absolute; top: 0; left: 28%; right: 28%; height: 2px; border-radius: 2px; background: var(--o-accent); }
+.ad-bottom svg { width: 1.2rem; height: 1.2rem; }
+.ad-bottom .ad-badge { position: absolute; top: 0.3rem; left: calc(50% + 0.3rem); }
+
+/* ---------- page ---------- */
+.ad-main { max-width: 80rem; margin: 0 auto; padding: 6rem 1.5rem 6rem; }
+@media (min-width: 1100px) { .ad-main { padding-bottom: 4rem; } }
+@media (max-width: 640px) { .ad-main { padding-inline: 1rem; } }
+.ad-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
+.ad-title { margin: 0.55rem 0 0; font-size: clamp(1.7rem, 3.4vw, 2.4rem); font-weight: 600; letter-spacing: -0.045em; line-height: 1.05; }
+.ad-head-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+
+/* segmented control */
+.ad-seg { display: inline-flex; gap: 0.2rem; padding: 0.22rem; border-radius: 999px; background: var(--o-surface); border: 1px solid var(--o-line); overflow-x: auto; max-width: 100%; }
+.ad-seg button { display: inline-flex; align-items: center; gap: 0.4rem; height: 2rem; padding: 0 0.9rem; border-radius: 999px; border: 0; background: transparent; color: var(--o-text-2); font: inherit; font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background-color var(--o-dur-s) var(--o-ease), color var(--o-dur-s) var(--o-ease); }
+.ad-seg button:hover { color: var(--o-text); }
+.ad-seg button.is-on { background: var(--o-surface-3); color: var(--o-text); box-shadow: inset 0 0 0 1px var(--o-line-strong); }
+
+/* The older panels (requests table, visitors, settings) use rounded-xl / rounded-lg
+   with the shared tokens; bring them to the site's softer radii without rewriting them. */
+.ad .rounded-xl { border-radius: 20px; }
+.ad .rounded-lg { border-radius: 14px; }
+.ad input:not([type='checkbox']):not([type='radio']):not([type='file']), .ad select, .ad textarea { border-radius: 14px; }
+
+/* ---------- lead board ---------- */
+.ad-board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(16.5rem, 1fr); gap: 0.9rem; overflow-x: auto; padding-bottom: 0.8rem; scroll-snap-type: x proximity; }
+@media (min-width: 1200px) { .ad-board { grid-auto-columns: minmax(0, 1fr); overflow-x: visible; } }
+.ad-col { scroll-snap-align: start; display: flex; flex-direction: column; min-height: 12rem; border-radius: 22px; background: var(--o-surface); border: 1px solid var(--o-line); transition: border-color var(--o-dur-s) var(--o-ease), background-color var(--o-dur-s) var(--o-ease); }
+.ad-col.is-over { border-color: var(--o-accent); background: rgba(0, 174, 239, 0.06); }
+.ad-col-head { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; font-size: 0.82rem; font-weight: 600; letter-spacing: -0.01em; }
+.ad-col-list { display: grid; gap: 0.6rem; padding: 0 0.7rem 0.7rem; max-height: 68svh; overflow-y: auto; align-content: start; flex: 1; }
+.ad-card { text-align: left; width: 100%; padding: 0.85rem 0.9rem; border-radius: 16px; background: var(--o-surface-2); border: 1px solid var(--o-line); color: inherit; font: inherit; cursor: grab; display: grid; gap: 0.45rem; transition: transform var(--o-dur-s) var(--o-ease), border-color var(--o-dur-s) var(--o-ease), background-color var(--o-dur-s) var(--o-ease); }
+.ad-card:hover { border-color: var(--o-line-strong); background: var(--o-surface-3); }
+.ad-card.is-dragging { opacity: 0.4; transform: scale(0.97); }
+.ad-chip { display: inline-flex; align-items: center; gap: 0.3rem; height: 1.45rem; padding: 0 0.55rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; border: 1px solid var(--o-line-strong); color: var(--o-text-2); }
+.ad-chip.is-overdue { color: #FB7185; border-color: rgba(251, 113, 133, 0.45); background: rgba(251, 113, 133, 0.1); }
+.ad-chip.is-today { color: var(--o-accent); border-color: rgba(0, 174, 239, 0.45); background: rgba(0, 174, 239, 0.1); }
+
+/* ---------- lead drawer ---------- */
+.ad-scrim { position: fixed; inset: 0; z-index: 80; background: rgba(5, 6, 8, 0.72); backdrop-filter: blur(5px); animation: o2-fade 200ms var(--o-ease) both; }
+.ad-drawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 81; width: min(100%, 36rem); display: flex; flex-direction: column; background: var(--o-surface); border-left: 1px solid var(--o-line-strong); box-shadow: -40px 0 80px -30px rgba(0, 0, 0, 0.9); animation: ad-slide 320ms var(--o-ease) both; }
+@keyframes ad-slide { from { transform: translateX(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ad-drawer, .ad-scrim { animation-duration: 1ms; } }
+
+/* ---------- printable report ---------- */
+@media print {
+  body * { visibility: hidden !important; }
+  .ad-report, .ad-report * { visibility: visible !important; }
+  .ad-report { position: absolute; left: 0; top: 0; width: 100%; padding: 1.2cm; }
+  .ad-report, .ad-report * { color: #111 !important; background: transparent !important; border-color: #cfd3d8 !important; box-shadow: none !important; }
+  .ad-report .ad-bar { background: #00AEEF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ad-noprint { display: none !important; }
+  .ad-report table { page-break-inside: auto; }
+  .ad-report tr { page-break-inside: avoid; }
+}

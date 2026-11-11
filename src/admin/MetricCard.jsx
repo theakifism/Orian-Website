@@ -1,6 +1,12 @@
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
+// `label` is a human-readable string ('Unique visitors') used raw as an SVG
+// id below. Spaces there break the fill={`url(#...)`} reference (the space
+// ends the url() token early), which was silently killing the sparkline's
+// gradient fill on every multi-word label. Slugify it into a safe id.
+const slugifyId = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
 // Compares the sum of the most recent 7 days against the 7 days before that.
 // Returns null when there isn't enough history yet to compare fairly.
 function computeTrend(daily) {
@@ -42,7 +48,7 @@ const MetricCard = ({ label, value, daily, loading }) => {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={daily} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
               <defs>
-                <linearGradient id={`spark-${label}`} x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={`spark-${slugifyId(label)}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#00AEEF" stopOpacity={0.35} />
                   <stop offset="100%" stopColor="#00AEEF" stopOpacity={0} />
                 </linearGradient>
@@ -52,7 +58,7 @@ const MetricCard = ({ label, value, daily, loading }) => {
                 dataKey="count"
                 stroke="#00AEEF"
                 strokeWidth={1.5}
-                fill={`url(#spark-${label})`}
+                fill={`url(#spark-${slugifyId(label)})`}
                 isAnimationActive={false}
               />
             </AreaChart>

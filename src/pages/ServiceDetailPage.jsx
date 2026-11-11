@@ -1,35 +1,33 @@
 import React from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
-import Accordion from '../components/Accordion';
 import Seo from '../seo/Seo';
 import { serviceMeta } from '../seo/pageMeta';
 import { serviceSchema, faqSchema } from '../seo/jsonld';
-import { getServiceBySlug, services } from '../data/services';
-import { industries } from '../data/industries';
-import { GatewayIcon, WaveformIcon, ShieldCheckIcon, ChatIcon, CheckCircleIcon } from '../components/CardIcons';
-
-const iconMap = {
-  gateway: GatewayIcon,
-  waveform: WaveformIcon,
-  shield: ShieldCheckIcon,
-  chat: ChatIcon,
-};
+import { useCollection, useContentReady, findBySlug } from '../content';
+import { FaqList } from '../components/o2/FaqSection';
+import { useUI } from '../context/UIContext';
+import { Arrow } from '../components/o2/Icons';
+import { guides as allGuides } from '../data/guides';
+import { renderInline } from '../utils/inlineLinks';
+import { useCases as allUseCases } from '../data/useCases';
+import { serviceDetail } from '../data/services.detail';
 
 const ServiceDetailPage = () => {
   const { slug } = useParams();
-  const service = getServiceBySlug(slug);
+  const { openLead, openCommand } = useUI();
+  const services = useCollection('services');
+  const industries = useCollection('industries');
+  const ready = useContentReady();
+  const serviceBase = findBySlug(services, slug);
+  const service = serviceBase && { ...serviceBase, ...serviceDetail[serviceBase.slug] };
 
-  if (!service) {
-    return <Navigate to="/services" replace />;
-  }
+  if (!service) return ready ? <Navigate to="/services" replace /> : null;
 
-  const Icon = iconMap[service.icon] || GatewayIcon;
-  const relatedIndustries = industries.filter((i) => i.services.includes(service.slug)).slice(0, 4);
-  const otherServices = services.filter((s) => s.slug !== service.slug);
-
-  // Falls back to auto-generated copy if this slug isn't in the
-  // hand-tuned serviceMeta map yet (e.g. a newly added service).
+  const related = industries.filter((i) => i.services.includes(service.slug)).slice(0, 4);
+  const others = services.filter((s) => s.slug !== service.slug);
+  const relatedGuides = allGuides.filter((g) => (g.services || []).includes(service.slug));
+  const relatedUseCases = allUseCases.filter((u) => (u.services || []).includes(service.slug));
   const meta = serviceMeta[service.slug] || {
     title: `${service.title} | Orian Teleservices`.slice(0, 60),
     description: service.desc,
@@ -44,135 +42,106 @@ const ServiceDetailPage = () => {
         jsonLd={[serviceSchema(service), faqSchema(service.faqs)]}
       />
       <PageHeader
-        eyebrow="Service"
+        eyebrow={service.slug === 'bulk-sms-otp-gateways' ? 'Primary service' : 'Service'}
         title={service.title}
         subtitle={service.tagline}
         breadcrumbs={[{ label: 'Services', href: '/services' }, { label: service.title }]}
-        glowClass="bg-[#00AEEF]/10"
-      />
+      >
+        <div className="o2-cta-row" style={{ marginTop: '2rem' }}>
+          <button type="button" className="o2-btn o2-btn-primary" onClick={() => openLead(`service-${service.slug}`)} data-track="service_talk_to_us">Talk to us <Arrow /></button>
+          <button type="button" className="o2-btn o2-btn-ghost" onClick={openCommand}>Ask the AI assistant</button>
+        </div>
+      </PageHeader>
 
-      <section className="relative pb-24 bg-transparent overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-          <div className="lg:col-span-2 space-y-8">
-            {/* Overview card */}
-            <div className={`p-8 bg-[var(--surface)]/90 border border-[var(--border)] rounded-2xl backdrop-blur-xl transition-all duration-300 ${service.borderHover}`}>
-              <span className={`inline-flex w-11 h-11 items-center justify-center rounded-xl mb-5 ${service.tagColor}`}>
-                <Icon className="w-6 h-6" />
-              </span>
-              <p className="text-[var(--text-soft)] text-sm md:text-base leading-relaxed">{service.overview}</p>
-
-              <div className="grid grid-cols-3 gap-3 mt-8 pt-6 border-t border-[var(--border)]">
-                {service.stats.map((stat) => (
-                  <div key={stat.label} className="text-center">
-                    <div className="text-lg md:text-2xl font-extrabold font-mono" style={{ color: service.accentColor }}>
-                      {stat.value}
-                    </div>
-                    <div className="text-[10px] md:text-xs text-[var(--text-faint)] mt-1">{stat.label}</div>
+      <section className="o2 o2-sec" data-section="service-overview">
+        <div className="o2-wrap">
+          <div className="o2-two">
+            <div>
+              <span className="o2-eyebrow"><i />Overview</span>
+              <p className="o2-prose" style={{ marginTop: '1.2rem', fontSize: '1.15rem' }}>{service.overview}</p>
+              <dl className="o2-meter" style={{ marginTop: '2rem', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
+                {service.stats.map((st) => (
+                  <div key={st.label}>
+                    <dt>{st.label}</dt>
+                    <dd className="is-text" style={{ fontSize: '1rem', paddingTop: '0.1rem' }}>{st.value}</dd>
                   </div>
                 ))}
-              </div>
+              </dl>
             </div>
-
-            {/* Features */}
-            <div className="p-8 bg-[var(--surface)]/90 border border-[var(--border)] rounded-2xl backdrop-blur-xl">
-              <h2 className="text-xl font-bold text-[var(--text)] mb-5">What's included</h2>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {service.features.map((feature) => (
-                  <div
-                    key={feature}
-                    className="flex items-start gap-3 p-4 bg-[var(--overlay)] border border-[var(--border)] rounded-xl transition-all duration-300 hover:-translate-y-0.5"
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = service.accentColor; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = ''; }}
-                  >
-                    <span className="shrink-0 mt-0.5" style={{ color: service.accentColor }}>
-                      <CheckCircleIcon className="w-5 h-5" />
-                    </span>
-                    <span className="text-xs md:text-sm text-[var(--text-soft)] leading-snug">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* How it works */}
-            <div className="p-8 bg-[var(--surface)]/90 border border-[var(--border)] rounded-2xl backdrop-blur-xl">
-              <h2 className="text-xl font-bold text-[var(--text)] mb-6">How it works</h2>
-              <div className="space-y-6">
-                {service.howItWorks.map((step, idx) => (
-                  <div key={step.title} className="flex gap-4">
-                    <div
-                      className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-xs font-bold font-mono border"
-                      style={{ borderColor: `${service.accentColor}66`, color: service.accentColor, backgroundColor: `${service.accentColor}1A` }}
-                    >
-                      {idx + 1}
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-[var(--text)] mb-1">{step.title}</h3>
-                      <p className="text-xs md:text-sm text-[var(--text-dim)] leading-relaxed">{step.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* FAQs */}
-            <div className="p-8 bg-[var(--surface)]/90 border border-[var(--border)] rounded-2xl backdrop-blur-xl">
-              <h2 className="text-xl font-bold text-[var(--text)] mb-2">Frequently asked</h2>
-              <Accordion items={service.faqs} accentColor={service.accentColor} />
+            <div>
+              <span className="o2-eyebrow"><i />What is included</span>
+              <ul className="o2-list" style={{ marginTop: '1.2rem' }}>
+                {service.features.map((f) => <li key={f}>{f}</li>)}
+              </ul>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Sidebar */}
-          <aside className="space-y-4">
-            <div className="p-6 bg-[var(--surface)]/90 border border-[var(--border)] rounded-2xl text-center">
-              <p className="text-sm text-[var(--text-dim)] mb-4">Ready to set up {service.title.toLowerCase()}?</p>
-              <Link
-                to="/contact"
-                className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 bg-[#00AEEF] text-black font-semibold rounded-xl text-sm hover:bg-[#E8A23D] transition-colors"
-              >
-                Talk to our team &rarr;
-              </Link>
-              <Link
-                to="/assistant"
-                className="inline-flex items-center justify-center w-full gap-2 px-6 py-3 mt-3 bg-[var(--overlay)] border border-[var(--border)] text-[var(--text-soft)] font-semibold rounded-xl text-sm hover:bg-[var(--overlay-strong)] transition-colors"
-              >
-                Ask the AI assistant
-              </Link>
+      {service.sections?.length > 0 && (
+        <section className="o2 o2-sec" data-section="service-detail">
+          <div className="o2-wrap">
+            <article className="o2-prose" style={{ maxWidth: '46rem' }}>
+              {service.sections.map((sec) => (
+                <React.Fragment key={sec.title}>
+                  <h2>{sec.title}</h2>
+                  {sec.p && <p>{renderInline(sec.p)}</p>}
+                </React.Fragment>
+              ))}
+            </article>
+          </div>
+        </section>
+      )}
+
+      <section className="o2 o2-sec is-alt" data-section="service-steps">
+        <div className="o2-wrap">
+          <div className="o2-sec-head"><span className="o2-eyebrow"><i />How it works</span><h2 className="o2-h2">From first call to live.</h2></div>
+          <div className="o2-stepper cols-4">
+            {service.howItWorks.map((s) => (<div key={s.title}><h3>{s.title}</h3><p>{s.desc}</p></div>))}
+          </div>
+        </div>
+      </section>
+
+      <section className="o2 o2-sec" data-section="service-faq">
+        <div className="o2-wrap">
+          <div className="o2-two">
+            <div>
+              <div className="o2-sec-head" style={{ marginBottom: '1.5rem' }}><span className="o2-eyebrow"><i />FAQ</span><h2 className="o2-h2">Frequently asked.</h2></div>
+              <FaqList faqs={service.faqs} />
             </div>
-
-            {relatedIndustries.length > 0 && (
-              <div className="p-6 bg-[var(--surface)]/70 border border-[var(--border)] rounded-2xl">
-                <span className="text-xs font-mono tracking-widest text-[var(--text-faint)] uppercase">Popular in</span>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {relatedIndustries.map((ind) => (
-                    <Link
-                      key={ind.slug}
-                      to={`/industries/${ind.slug}`}
-                      className={`px-3 py-1.5 border border-[var(--border)] rounded-full text-xs font-mono text-[var(--text-soft)] transition-all duration-300 hover:-translate-y-0.5 ${ind.hover}`}
-                    >
-                      {ind.name}
-                    </Link>
-                  ))}
+            <div style={{ display: 'grid', gap: '1.5rem', alignContent: 'start' }}>
+              {related.length > 0 && (
+                <div className="o2-card">
+                  <span className="o2-t-kicker">Popular in</span>
+                  <div className="o2-chiprow" style={{ marginTop: '1rem' }}>
+                    {related.map((i) => <Link key={i.slug} to={`/industries/${i.slug}`} className="o2-chip" style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none' }}>{i.name}</Link>)}
+                  </div>
                 </div>
-              </div>
-            )}
-
-            <div className="p-6 bg-[var(--surface)]/70 border border-[var(--border)] rounded-2xl">
-              <span className="text-xs font-mono tracking-widest text-[var(--text-faint)] uppercase">Other Services</span>
-              <div className="flex flex-col gap-2 mt-3">
-                {otherServices.map((s) => (
-                  <Link
-                    key={s.slug}
-                    to={`/services/${s.slug}`}
-                    className="text-sm text-[var(--text-soft)] hover:text-[#00AEEF] transition-colors"
-                  >
-                    {s.title}
-                  </Link>
-                ))}
+              )}
+              {relatedUseCases.length > 0 && (
+                <div className="o2-card">
+                  <span className="o2-t-kicker">Use cases</span>
+                  <ul className="o2-list" style={{ marginTop: '1rem' }}>
+                    {relatedUseCases.map((u) => (<li key={u.slug}><Link to={`/use-cases/${u.slug}`} style={{ color: 'var(--o-text-2)' }}>{u.title}</Link></li>))}
+                  </ul>
+                </div>
+              )}
+              {relatedGuides.length > 0 && (
+                <div className="o2-card">
+                  <span className="o2-t-kicker">Guides</span>
+                  <ul className="o2-list" style={{ marginTop: '1rem' }}>
+                    {relatedGuides.map((g) => (<li key={g.slug}><Link to={`/resources/${g.slug}`} style={{ color: 'var(--o-text-2)' }}>{g.title}</Link></li>))}
+                  </ul>
+                </div>
+              )}
+              <div className="o2-card">
+                <span className="o2-t-kicker">Other services</span>
+                <ul className="o2-list" style={{ marginTop: '1rem' }}>
+                  {others.map((s) => (<li key={s.slug}><Link to={`/services/${s.slug}`} style={{ color: 'var(--o-text-2)' }}>{s.title}</Link></li>))}
+                </ul>
               </div>
             </div>
-          </aside>
-
+          </div>
         </div>
       </section>
     </>

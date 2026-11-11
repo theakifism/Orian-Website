@@ -7,15 +7,15 @@ const faqKnowledgeBase = [
   },
   {
     q: "How many carrier routes does Orian cover?",
-    a: "Orian connects directly with over 1,200 operator routes across 180+ countries with smart fallback routing to guarantee high delivery rates."
+    a: "Route coverage and fallback options depend on the service. Contact Orian to confirm what applies to your account."
   },
   {
     q: "What is the WhatsApp Business API SLA uptime?",
-    a: "We maintain a guaranteed 99.99% Uptime SLA for transactional messages, voice blasting, and WhatsApp Business API gateways."
+    a: "Any uptime commitments are set out in the applicable service agreement. Contact Orian to confirm terms for your account."
   },
   {
     q: "How do I start a messaging campaign?",
-    a: "You can click on 'Start a project' or reach out via our 24/7 hotline. Our technical team will assist with template approval and API key setup."
+    a: "Use the contact page to reach the team and discuss registration or integration requirements."
   }
 ];
 
@@ -42,7 +42,7 @@ const Faq = () => {
 
       const botReply = match 
         ? match.a 
-        : "Thank you for asking! For custom carrier routing prices or enterprise SLA setups, our team is available 24/7 at support@orian.in.";
+        : "For routing, DLT or enterprise setup questions, contact the team using the details on our Contact page.";
 
       setMessages((prev) => [...prev, { text: botReply, sender: "bot" }]);
     }, 500);
@@ -53,9 +53,9 @@ const Faq = () => {
       {/* Interactive Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-gradient-to-r from-[#00AEEF] to-blue-600 rounded-full flex items-center justify-center text-white shadow-[0_0_25px_rgba(0,174,239,0.6)] hover:scale-110 transition-all duration-300"
+        className="w-14 h-14 bg-[#00AEEF] rounded-full flex items-center justify-center text-white hover:scale-110 transition-all duration-300"
       >
-        {isOpen ? <span className="text-xl font-bold">✕</span> : <span className="text-2xl">💬</span>}
+        {isOpen ? <span className="text-xl font-bold">✕</span> : <span className="text-xl font-bold">+</span>}
       </button>
 
       {/* Floating Chat Box */}
@@ -68,7 +68,7 @@ const Faq = () => {
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
               <span className="font-mono text-sm font-bold text-white">Orian Live Assistant</span>
             </div>
-            <span className="text-xs text-gray-400 font-mono">24/7 Active</span>
+            <span className="text-xs text-gray-400 font-mono">Ask a question</span>
           </div>
 
           {/* Chat Messages */}
@@ -102,11 +102,11 @@ const Faq = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Ask a question..."
-              className="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00AEEF]"
+              className="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/40"
             />
             <button
               onClick={() => handleSend()}
-              className="px-3 py-2 bg-[#00AEEF] text-white rounded-lg text-xs font-bold hover:bg-blue-600 transition-colors"
+              className="px-3 py-2 bg-[#00AEEF] text-white rounded-lg text-xs font-bold hover:bg-[#00AEEF] transition-colors"
             >
               Send
             </button>

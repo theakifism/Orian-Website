@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -8,7 +7,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
-import { Download, Globe2, Smartphone, FileText, Link2 } from 'lucide-react';
+import { Download, Globe2, Smartphone, FileText, Link2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Skeleton from './Skeleton';
 import MetricCard from './MetricCard';
 import { downloadCsv } from './csv';
@@ -53,11 +52,19 @@ const BreakdownList = ({ icon: Icon, title, items, renderLabel, total }) => (
   </div>
 );
 
-const VisitorsPanel = ({ visitorData, loading }) => {
-  const totalForPct = useMemo(
-    () => (visitorData?.topPages || []).reduce((s, p) => s + p.count, 0),
-    [visitorData]
-  );
+const VISITOR_PAGE_SIZE = 100;
+
+const VisitorsPanel = ({ visitorData, loading, page = 1, onPageChange }) => {
+  // The correct shared denominator for every breakdown's percentage: how
+  // many rows were actually sampled, NOT the sum of any one category's
+  // top-8 counts (that undercounts once a category has a long tail beyond
+  // its top 8 — a bug that made every bar's percentage read too high).
+  const totalForPct = visitorData?.sampleSize || 0;
+
+  const totalVisitors = visitorData?.totals?.uniqueVisitors || 0;
+  const totalPages = Math.max(1, Math.ceil(totalVisitors / VISITOR_PAGE_SIZE));
+  const rangeStart = totalVisitors === 0 ? 0 : (page - 1) * VISITOR_PAGE_SIZE + 1;
+  const rangeEnd = Math.min(page * VISITOR_PAGE_SIZE, totalVisitors);
 
   const handleExport = () => {
     if (!visitorData?.visitors) return;
@@ -80,19 +87,18 @@ const VisitorsPanel = ({ visitorData, loading }) => {
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <MetricCard
-          label="Unique visitors"
-          value={visitorData?.totals.uniqueVisitors ?? 0}
-          daily={visitorData?.dailyVisits}
-          loading={loading}
-        />
+        {/* No `daily` sparkline here on purpose — dailyVisits is a series of
+            page VISITS, not distinct visitors, and showing it under "Unique
+            visitors" was misleading. Total visits below is what that series
+            actually describes. */}
+        <MetricCard label="Unique visitors" value={visitorData?.totals?.uniqueVisitors ?? 0} loading={loading} />
         <MetricCard
           label="Total visits"
-          value={visitorData?.totals.totalVisits ?? 0}
+          value={visitorData?.totals?.totalVisits ?? 0}
           daily={visitorData?.dailyVisits}
           loading={loading}
         />
-        <MetricCard label="Visits today" value={visitorData?.totals.visitsToday ?? 0} loading={loading} />
+        <MetricCard label="Visits today" value={visitorData?.totals?.visitsToday ?? 0} loading={loading} />
       </div>
 
       {/* Big visitor traffic graph — the main "show me the trend" view */}
@@ -145,13 +151,21 @@ const VisitorsPanel = ({ visitorData, loading }) => {
       </div>
 
       {/* Full visitor detail table — IP, device, country, all in full */}
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold">Visitor detail</h3>
+      <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+        <h3 className="text-sm font-semibold">
+          Visitor detail
+          {totalVisitors > 0 && (
+            <span className="ml-2 font-normal text-[var(--text-dim)]">
+              (showing {rangeStart}–{rangeEnd} of {totalVisitors})
+            </span>
+          )}
+        </h3>
         <button
           onClick={handleExport}
+          title="Exports only the visitors currently loaded on this page"
           className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] transition-colors"
         >
-          <Download size={13} /> Export CSV
+          <Download size={13} /> Export CSV (this page)
         </button>
       </div>
 
@@ -245,6 +259,28 @@ const VisitorsPanel = ({ visitorData, loading }) => {
               </div>
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between gap-3 mt-4 flex-wrap">
+              <p className="text-xs text-[var(--text-dim)]">Page {page} of {totalPages}</p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onPageChange?.(page - 1)}
+                  disabled={page <= 1}
+                  className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] disabled:opacity-40 disabled:hover:bg-[var(--overlay)] transition-colors"
+                >
+                  <ChevronLeft size={13} /> Previous
+                </button>
+                <button
+                  onClick={() => onPageChange?.(page + 1)}
+                  disabled={page >= totalPages}
+                  className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] disabled:opacity-40 disabled:hover:bg-[var(--overlay)] transition-colors"
+                >
+                  Next <ChevronRight size={13} />
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </>

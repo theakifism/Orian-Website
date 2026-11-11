@@ -1,8 +1,12 @@
 @import "tailwindcss";
+@import "./styles/o2.css";
+@import "./styles/o2-site.css";
+@import "./styles/o2-mobile.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  --font-sans: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --animate-grid-scroll: gridScroll 20s linear infinite;
   --animate-float-glow-1: floatGlow1 12s ease-in-out infinite;
   --animate-float-glow-2: floatGlow2 15s ease-in-out infinite;
@@ -81,7 +85,7 @@
   --text: #0B0D12;
   --text-soft: #384152;
   --text-dim: #626C7E;
-  --text-faint: #8993A4;
+  --text-faint: #6B7685;
   --map-filter: none;
   --shadow-ambient: 0 10px 40px rgba(15, 23, 42, 0.08);
   color-scheme: light;
@@ -99,7 +103,7 @@
   --text: #FFFFFF;
   --text-soft: #D1D5DB;
   --text-dim: #9CA3AF;
-  --text-faint: #6B7280;
+  --text-faint: #7F8898;
   --map-filter: invert(90%) hue-rotate(180deg) contrast(120%) brightness(90%);
   --shadow-ambient: 0 10px 40px rgba(0, 0, 0, 0.8);
   color-scheme: dark;
@@ -121,87 +125,8 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, sans-serif;
   transition: background-color 0.4s ease, color 0.4s ease;
-}
-
-/* ---------------------------------------------------- */
-/* Hero orbit diagram — the ONE animation left running on */
-/* mobile. Kept on its own dedicated classes (instead of  */
-/* the shared animate-* utilities below) so the mobile     */
-/* motion-off rule further down can never touch it.        */
-/* ---------------------------------------------------- */
-.orbit-ring-outer {
-  animation: spinSlow 50s linear infinite;
-}
-
-.orbit-ring-middle {
-  animation: spinSlowReverse 70s linear infinite;
-}
-
-.orbit-ring-inner {
-  animation: spinSlow 22s linear infinite;
-}
-
-.orbit-icon-float {
-  animation: floatCard 4s ease-in-out infinite;
-}
-
-.orbit-glow-pulse {
-  animation: pulseSlow 5s ease-in-out infinite;
-}
-
-.orbit-live-dot {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .orbit-ring-outer,
-  .orbit-ring-middle,
-  .orbit-ring-inner,
-  .orbit-icon-float,
-  .orbit-glow-pulse,
-  .orbit-live-dot {
-    animation: none;
-  }
-}
-
-/* ---------------------------------------------------- */
-/* Interactive3DNetwork — the draggable 3D "gyroscope"   */
-/* diagram used across several pages. Each ring keeps    */
-/* its own static tilt (set via --i3d-tiltx/--i3d-tilty  */
-/* custom props) while spinning continuously around its  */
-/* own plane, so the parent's drag-driven rotateX/rotateY */
-/* (applied imperatively in JS) and this rim-spin never   */
-/* fight over the `transform` property.                  */
-/* ---------------------------------------------------- */
-.i3d-ring-a {
-  animation: i3dRingSpin 16s linear infinite;
-}
-
-.i3d-ring-b {
-  animation: i3dRingSpin 22s linear infinite reverse;
-}
-
-.i3d-ring-c {
-  animation: i3dRingSpin 10s linear infinite;
-}
-
-@keyframes i3dRingSpin {
-  from {
-    transform: rotateX(var(--i3d-tiltx, 0deg)) rotateY(var(--i3d-tilty, 0deg)) rotateZ(0deg);
-  }
-  to {
-    transform: rotateX(var(--i3d-tiltx, 0deg)) rotateY(var(--i3d-tilty, 0deg)) rotateZ(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .i3d-ring-a,
-  .i3d-ring-b,
-  .i3d-ring-c {
-    animation: none;
-  }
 }
 
 /* ---------------------------------------------------- */
@@ -282,6 +207,11 @@ body {
   animation: pageEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes typewriterBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 @keyframes pageEnter {
   from {
     opacity: 0;
@@ -343,9 +273,9 @@ body {
   filter: blur(14px);
   transform: translateY(var(--reveal-y, 56px)) scale(0.97);
   transition:
-    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.38s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform, filter;
 }
 
@@ -369,14 +299,35 @@ body {
   transform-origin: var(--reveal-origin, center bottom);
   filter: blur(10px);
   transition:
-    opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal-3d.in-view {
   transform: perspective(1400px) translateY(0) rotateX(0deg) scale(1);
   filter: blur(0px);
+}
+
+/* --- Side variant: content slides in from the left/right instead of      */
+/* rising from below — used to break up the monotony of every section     */
+/* using the same "rise from bottom" motion. Direction set via            */
+/* --reveal-x (see Reveal.jsx's `variant="side"` / `side="left|right"`).  */
+.reveal-side {
+  opacity: 0;
+  filter: blur(12px);
+  transform: translateX(var(--reveal-x, 72px)) scale(0.96);
+  transition:
+    opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform, filter;
+}
+
+.reveal-side.in-view {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateX(0) scale(1);
 }
 
 /* Give any cards/grid items inside a revealed section a subtle staggered
@@ -386,6 +337,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .reveal-3d,
+  .reveal-side,
   .tilt-card-inner {
     transition: none;
     opacity: 1;
@@ -431,6 +383,7 @@ body {
      on phones instead of these classnames, so this is just a safety net. */
   .reveal,
   .reveal-3d,
+  .reveal-side,
   .tilt-card-inner {
     transition: none !important;
     opacity: 1 !important;
@@ -482,49 +435,39 @@ body {
    Neutralize hover-driven movement (not color/shadow) wherever it fires
    on a device that has no real pointer to hover with. */
 @media (hover: none) {
-  *:hover {
+  /* Doodle scenes animate by transform, so they're exempt. */
+  *:hover:not(.dd-svg, .dd-svg *) {
     transform: none !important;
   }
-
-  /* Exempt the orbit diagram and everything inside it — its rings spin
-     via a running CSS animation, not a hover trigger, and the blanket
-     rule above would otherwise be able to freeze that transform. */
-  .orbit-diagram:hover,
-  .orbit-diagram :hover {
-    transform: revert !important;
-  }
 }
 
-/* ---------------------------------------------------- */
-/* TiltCard: cursor-tracking 3D tilt + scroll pop-in     */
-/* Two-layer wrapper so it never touches the card's own  */
-/* className/hover styles — those keep working as-is.    */
-/* ---------------------------------------------------- */
-.tilt-card-outer {
-  perspective: 1000px;
+/* Careers stat tiles: same fix as .why-us-card below — border/glow driven
+   by CSS :hover instead of a manual style write that only ever reset the
+   tilt transform, never the border color or shadow, on mouse-leave. */
+.career-stat-card {
+  border-color: var(--border);
+  box-shadow: 0 10px 24px -12px transparent;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.career-stat-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 16px 32px -12px var(--accent-glow);
 }
 
-.tilt-card-inner {
-  position: relative;
-  transform-style: preserve-3d;
-  will-change: transform, opacity, filter;
-  transition:
-    transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+/* "Why Choose Orian" cards: border + glow driven purely by CSS :hover
+   against a per-card --accent/--accent-glow variable, so the highlight
+   always resets cleanly the instant the cursor leaves — matching the
+   same hover-in/hover-out behavior every other card grid on the site
+   uses (Services, Industries, etc). The icon badge itself stays its
+   assigned accent color at all times, hover or not. */
+.why-us-card {
+  border-color: var(--border);
+  box-shadow: 0 10px 30px -10px transparent;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
-
-/* Cursor-tracked glow, layered above the card and driven by TiltCard's
-   pointer-position state. pointer-events: none keeps it from blocking the
-   card's own native :hover styles underneath it. */
-.tilt-card-spotlight {
-  position: absolute;
-  inset: 0;
-  /* Matches the rounded-2xl radius used on every card this wraps. */
-  border-radius: 1rem;
-  pointer-events: none;
-  z-index: 1;
-  transition: opacity 0.4s ease;
+.why-us-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 20px 40px -10px var(--accent-glow);
 }
 
 /* ---------------------------------------------------- */
@@ -757,8 +700,8 @@ body {
     border-color: rgba(168, 85, 247, 0.75);
   }
   50% {
-    box-shadow: 0 25px 70px -20px rgba(0, 174, 239, 0.3), 0 0 45px 6px rgba(232, 162, 61, 0.45);
-    border-color: rgba(232, 162, 61, 0.75);
+    box-shadow: 0 25px 70px -20px rgba(0, 174, 239, 0.3), 0 0 45px 6px rgba(52, 211, 153, 0.45);
+    border-color: rgba(52, 211, 153, 0.75);
   }
   75% {
     box-shadow: 0 25px 70px -20px rgba(0, 174, 239, 0.3), 0 0 45px 6px rgba(52, 211, 153, 0.45);
@@ -963,3 +906,99 @@ body {
 .admin-mobile-tabbar {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* ---------------------------------------------------- */
+/* Illustration motion (DoodleIcons.jsx)                  */
+/* Deliberately subtle: slow floats, soft pulses, flowing */
+/* dashes and rising bars -- no wobbling or twinkling.    */
+/* ---------------------------------------------------- */
+.dd-svg * { transform-box: fill-box; }
+.dd-svg .pd-tick { transform-box: view-box; transform-origin: 100px 100px; animation: pdSpin 6s linear infinite; }
+.dd-svg .pd-spin { transform-origin: center; animation: pdSpin 40s linear infinite; }
+@keyframes pdSpin { to { transform: rotate(360deg); } }
+
+.dd-svg .pd-float   { animation: pdFloat 4.5s ease-in-out infinite; }
+.dd-svg .pd-float-2 { animation: pdFloat 4.5s ease-in-out -2.2s infinite; }
+@keyframes pdFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+.dd-svg .pd-rise { animation: pdRise 3.6s ease-in-out infinite; }
+@keyframes pdRise {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+.dd-svg .pd-drift { animation: pdDrift 5s ease-in-out infinite; }
+@keyframes pdDrift {
+  0%, 100% { transform: translateX(-3px); opacity: 0.7; }
+  50%      { transform: translateX(3px);  opacity: 1; }
+}
+
+.dd-svg .pd-pulse { transform-origin: center; animation: pdPulse 2.8s ease-in-out infinite; }
+@keyframes pdPulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%      { transform: scale(1.06); opacity: 0.85; }
+}
+
+.dd-svg .pd-ring { transform-origin: center; animation: pdRing 3s ease-out infinite; }
+@keyframes pdRing {
+  0%   { transform: scale(0.9);  opacity: 0.55; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.dd-svg .pd-flow { animation: pdFlow 1.4s linear infinite; }
+@keyframes pdFlow { to { stroke-dashoffset: -20; } }
+
+.dd-svg .pd-bar { transform-origin: bottom center; animation: pdBar 3.2s ease-in-out infinite; }
+@keyframes pdBar {
+  0%, 100% { transform: scaleY(0.8); }
+  50%      { transform: scaleY(1); }
+}
+
+.dd-svg .pd-dot { animation: pdDot 1.2s ease-in-out infinite; }
+@keyframes pdDot {
+  0%, 100% { transform: translateY(0);    opacity: 0.6; }
+  50%      { transform: translateY(-3px); opacity: 1; }
+}
+
+/* Icons are static -- calm, professional look. */
+.dd-svg * { animation: none !important; }
+
+/* ---------------------------------------------------- */
+/* Preloader (TypingPreloader.jsx)                        */
+/* ---------------------------------------------------- */
+.orian-pl-logo   { opacity: 0; animation: plLogo 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards; }
+.orian-pl-ring   { background: conic-gradient(from 0deg, transparent 0 55%, #00AEEF 80%, #A855F7 100%) border-box;
+                   -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+                   -webkit-mask-composite: xor; mask-composite: exclude; border-width: 2px;
+                   animation: plSpin 1.4s linear infinite; }
+.orian-pl-letter { display: inline-block; opacity: 0; transform: translateY(10px); animation: plLetter 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.orian-pl-sub    { opacity: 0; animation: plFade 0.6s ease 0.7s forwards; }
+.orian-pl-tag    { opacity: 0; animation: plFade 0.6s ease 0.9s forwards; }
+.orian-pl-bar    { width: 0; animation: plBar 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards; }
+@keyframes plLogo   { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+@keyframes plSpin   { to { transform: rotate(360deg); } }
+@keyframes plLetter { to { opacity: 1; transform: translateY(0); } }
+@keyframes plFade   { to { opacity: 1; } }
+@keyframes plBar    { to { width: 100%; } }
+
+/* ---- Branded splash (TypingPreloader): CSS-only so it never waits on JS ---- */
+.o2-splash {
+  position: fixed; inset: 0; z-index: 999;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg);
+  animation: o2-splash-out 400ms ease 1350ms forwards;
+}
+.o2-splash-text {
+  display: flex; align-items: center; margin: 0;
+  font: 700 clamp(1.25rem, 3vw, 1.875rem) / 1.2 'Segoe UI', 'Helvetica Neue', Arial, system-ui, sans-serif;
+  letter-spacing: 0.025em; color: var(--text);
+}
+.o2-splash-type { display: inline-block; white-space: nowrap; clip-path: inset(0 100% 0 0); animation: o2-splash-type 1000ms steps(25, end) 100ms forwards; }
+.o2-splash-cursor { display: inline-block; width: 2px; height: 1em; margin-left: 2px; background: #00AEEF; animation: typewriterBlink 1s step-end infinite; }
+@keyframes o2-splash-type { to { clip-path: inset(0 0 0 0); } }
+@keyframes o2-splash-out { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+html[data-splash='seen'] .o2-splash { display: none; }
+@media (prefers-reduced-motion: reduce) { .o2-splash { display: none; } }

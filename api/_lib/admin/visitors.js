@@ -1,6 +1,6 @@
 import { requireAdmin } from '../auth.js';
 import { requireSupabase } from '../supabase.js';
-import { bucketDailyCounts, daysAgoIso } from '../dates.js';
+import { bucketDailyCounts, daysAgoIso, startOfTodayIso } from '../dates.js';
 
 const PAGE_SIZE = 100;
 const SPARKLINE_DAYS = 14;
@@ -48,8 +48,7 @@ export default requireAdmin(async (req, res) => {
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
+  const startOfTodayIsoValue = startOfTodayIso();
 
   const [
     totalVisitsRes,
@@ -64,7 +63,7 @@ export default requireAdmin(async (req, res) => {
     supabase
       .from('visits')
       .select('id', { count: 'exact', head: true })
-      .gte('created_at', startOfToday.toISOString()),
+      .gte('created_at', startOfTodayIsoValue),
     supabase
       .from('visitor_stats')
       .select(
@@ -75,7 +74,12 @@ export default requireAdmin(async (req, res) => {
     supabase
       .from('visits')
       .select('created_at')
-      .gte('created_at', daysAgoIso(SPARKLINE_DAYS - 1)),
+      .gte('created_at', daysAgoIso(SPARKLINE_DAYS - 1))
+      // Explicit range rather than an unbounded select — PostgREST silently
+      // caps unbounded selects at 1000 rows, which would quietly undercount
+      // the daily sparkline on a busier site. 20000 comfortably covers 14
+      // days of traffic for a site this size; raise it if traffic grows.
+      .range(0, 19999),
     // One bounded query feeds Top Pages, Top Referrers, Country breakdown,
     // and Device breakdown — cheaper than four separate full-table scans.
     supabase
@@ -114,6 +118,10 @@ export default requireAdmin(async (req, res) => {
     topReferrers,
     topCountries,
     topDevices,
+    // The single shared denominator for every breakdown's percentage below —
+    // NOT the sum of any one category's top-8 counts, which undercounts
+    // once there's a long tail beyond the top 8 (see AGGREGATE_SAMPLE_SIZE).
+    sampleSize: aggregateRows.length,
     page,
     pageSize: PAGE_SIZE,
   });

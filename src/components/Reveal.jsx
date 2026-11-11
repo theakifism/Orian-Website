@@ -23,6 +23,12 @@ const Reveal = ({
   distance = 64,
   rotate = 20,
   delay = 0,
+  // 'up' (default): rises/tilts in from the bottom, direction-aware.
+  // 'side': slides in from the left or right instead — pass `side` to
+  // pick which. Used to break up sections that would otherwise all use
+  // the same "rise from below" motion.
+  variant = 'up',
+  side = 'left',
   ...rest
 }) => {
   const ref = useRef(null);
@@ -45,8 +51,12 @@ const Reveal = ({
         }
       },
       {
-        threshold: 0.12,
-        rootMargin: '-8% 0px -8% 0px',
+        threshold: 0.05,
+        // A larger positive bottom margin means the reveal fires while
+        // the section is still mostly below the fold, so it's already
+        // animating in by the time it scrolls into view — this is what
+        // made scroll entrances feel late/slow.
+        rootMargin: '0px 0px 22% 0px',
       }
     );
 
@@ -62,6 +72,24 @@ const Reveal = ({
         ref={ref}
         style={{ transitionDelay: inView ? `${delay}ms` : '0ms' }}
         className={`reveal-mobile ${inView ? 'in-view' : ''} ${className}`}
+        {...rest}
+      >
+        {children}
+      </Tag>
+    );
+  }
+
+  if (variant === 'side') {
+    const style = {
+      '--reveal-x': side === 'right' ? `${distance}px` : `-${distance}px`,
+      transitionDelay: inView ? `${delay}ms` : '0ms',
+    };
+
+    return (
+      <Tag
+        ref={ref}
+        style={style}
+        className={`reveal-side ${inView ? 'in-view' : ''} ${className}`}
         {...rest}
       >
         {children}

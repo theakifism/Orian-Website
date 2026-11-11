@@ -38,6 +38,16 @@ const WINDOW_SECONDS = 10 * 60;
 const LOCK_THRESHOLD = 5;
 const LOCK_MINUTES = 30;
 
+// A real bcrypt hash of a random, never-used password (generated once per
+// cold start, not hardcoded — a hardcoded string risks a subtly-invalid
+// format), compared against when no such account exists, purely so this
+// handler takes roughly the same time either way. Without this, an
+// attacker can tell "no such email" from "wrong password" just by timing
+// the response, since a real bcrypt.compare() takes tens of milliseconds
+// and skipping it takes microseconds — turning the deliberately generic
+// error message below into a timing side-channel that defeats its point.
+const DUMMY_HASH = bcrypt.hashSync(`decoy-${Date.now()}-${Math.random()}`, 12);
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -130,6 +140,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
   if (!admin) {
+    await bcrypt.compare(password, DUMMY_HASH); // burn the same time a real check would take
     await logAttempt(null, false);
     return res.status(401).json(invalidMessage);
   }

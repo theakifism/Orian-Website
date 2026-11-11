@@ -1,31 +1,39 @@
 import { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Head } from 'vite-react-ssg';
 import { ScrollFXProvider } from './context/ScrollFXContext';
+import { LangProvider } from './context/LangContext';
+import { UIProvider } from './context/UIContext';
 import Layout from './components/Layout';
 import SiteShell from './components/SiteShell';
+import { ContentProvider } from './content';
+import { buildData } from './content/build-data';
 
 import Home from './pages/Home';
-import AboutPage from './pages/AboutPage';
-import ServicesPage from './pages/ServicesPage';
-import ServiceDetailPage from './pages/ServiceDetailPage';
-import IndustriesPage from './pages/IndustriesPage';
-import IndustryDetailPage from './pages/IndustryDetailPage';
-import WhyUsPage from './pages/WhyUsPage';
-import WhyUsDetailPage from './pages/WhyUsDetailPage';
-import CareersPage from './pages/CareersPage';
-import ContactPage from './pages/ContactPage';
-import AssistantPage from './pages/AssistantPage';
 import NotFoundPage from './pages/NotFoundPage';
 
-import { services } from './data/services';
-import { industries } from './data/industries';
-import { whyUsData } from './data/whyUs';
+
+
+// Route-level code splitting: each public page is its own chunk, loaded when the route is
+// visited. vite-react-ssg resolves lazy routes at build time, so every page is still
+// prerendered to full HTML. Home stays eager because it is the usual entry point.
+const page = (loader) => ({
+  lazy: async () => ({ Component: (await loader()).default }),
+});
 
 const AdminLogin = lazy(() => import('./admin/AdminLogin'));
 const AdminRoute = lazy(() => import('./admin/AdminRoute'));
 
+// Keeps the admin panel out of search results (robots.txt also blocks /admin).
+const NoIndex = () => (
+  <Head>
+    <title>Admin | Orian Teleservices</title>
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+  </Head>
+);
+
 const AdminFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--text-dim)] text-sm">
+  <div className="min-h-screen flex items-center justify-center bg-(--bg) text-(--text-dim) text-sm">
     Loading…
   </div>
 );
@@ -38,7 +46,13 @@ const AdminFallback = () => (
 // component, which needs no extra provider here.
 const RootLayout = () => (
   <ScrollFXProvider>
-    <Outlet />
+    <LangProvider>
+      <UIProvider>
+        <ContentProvider>
+          <Outlet />
+        </ContentProvider>
+      </UIProvider>
+    </LangProvider>
   </ScrollFXProvider>
 );
 
@@ -51,6 +65,7 @@ export const routes = [
         path: 'admin/login',
         element: (
           <Suspense fallback={<AdminFallback />}>
+            <NoIndex />
             <AdminLogin />
           </Suspense>
         ),
@@ -59,49 +74,69 @@ export const routes = [
         path: 'admin',
         element: (
           <Suspense fallback={<AdminFallback />}>
+            <NoIndex />
             <AdminRoute />
           </Suspense>
         ),
       },
       {
-        // Everything below this is the public site: same Preloader +
-        // visit-tracking shell as before, then the shared Layout chrome
-        // (nav/footer/background), then the actual page content.
+        // Everything below this is the public site: visit-tracking shell,
+        // then the shared Layout chrome (nav/footer), then page content.
         element: <SiteShell />,
         children: [
           {
             element: <Layout />,
             children: [
               { index: true, element: <Home /> },
-              { path: 'about', element: <AboutPage /> },
+              { path: 'about', ...page(() => import('./pages/AboutPage')) },
 
-              { path: 'services', element: <ServicesPage /> },
+              { path: 'services', ...page(() => import('./pages/ServicesPage')) },
               {
                 path: 'services/:slug',
-                element: <ServiceDetailPage />,
+                ...page(() => import('./pages/ServiceDetailPage')),
                 // Tells vite-react-ssg which concrete URLs to prerender for
                 // this dynamic route — one static HTML file per service.
-                getStaticPaths: () => services.map((s) => `services/${s.slug}`),
+                getStaticPaths: () => buildData('services').map((s) => `services/${s.slug}`),
               },
 
-              { path: 'industries', element: <IndustriesPage /> },
+              { path: 'industries', ...page(() => import('./pages/IndustriesPage')) },
               {
                 path: 'industries/:slug',
-                element: <IndustryDetailPage />,
-                getStaticPaths: () => industries.map((i) => `industries/${i.slug}`),
+                ...page(() => import('./pages/IndustryDetailPage')),
+                getStaticPaths: () => buildData('industries').map((i) => `industries/${i.slug}`),
               },
 
-              { path: 'why-us', element: <WhyUsPage /> },
+              { path: 'why-us', ...page(() => import('./pages/WhyUsPage')) },
               {
                 path: 'why-us/:slug',
-                element: <WhyUsDetailPage />,
-                getStaticPaths: () => whyUsData.map((w) => `why-us/${w.slug}`),
+                ...page(() => import('./pages/WhyUsDetailPage')),
+                getStaticPaths: () => buildData('whyUs').map((w) => `why-us/${w.slug}`),
               },
 
-              { path: 'careers', element: <CareersPage /> },
-              { path: 'contact', element: <ContactPage /> },
-              { path: 'assistant', element: <AssistantPage /> },
+              { path: 'use-cases', ...page(() => import('./pages/UseCasesPage')) },
+              {
+                path: 'use-cases/:slug',
+                ...page(() => import('./pages/UseCaseDetailPage')),
+                getStaticPaths: () => buildData('useCases').map((u) => `use-cases/${u.slug}`),
+              },
+              { path: 'compliance', ...page(() => import('./pages/CompliancePage')) },
+              { path: 'developers', ...page(() => import('./pages/DevelopersPage')) },
+              { path: 'status', ...page(() => import('./pages/StatusPage')) },
+              {
+                path: 'resources/:slug',
+                ...page(() => import('./pages/GuidePage')),
+                getStaticPaths: () => buildData('guides').map((g) => `resources/${g.slug}`),
+              },
+              { path: 'careers', ...page(() => import('./pages/CareersPage')) },
+              { path: 'contact', ...page(() => import('./pages/ContactPage')) },
+              { path: 'bulk-sms-service-nagpur', ...page(() => import('./pages/NagpurPage')) },
+              { path: 'assistant', ...page(() => import('./pages/AssistantPage')) },
+              { path: 'help-center', ...page(() => import('./pages/HelpCenterPage')) },
+              { path: 'resources', ...page(() => import('./pages/ResourcesPage')) },
+              { path: 'privacy', ...page(() => import('./pages/PrivacyPage')) },
+              { path: 'terms', ...page(() => import('./pages/TermsPage')) },
 
+              { path: '404', element: <NotFoundPage /> },
               { path: '*', element: <NotFoundPage /> },
             ],
           },

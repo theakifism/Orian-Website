@@ -77,7 +77,7 @@ export async function sendTeamAlert(submission) {
   }
   return safeSend({
     to: TEAM_NOTIFY_EMAILS,
-    subject: `New requirement request: ${submission.name}${submission.company ? ` (${submission.company})` : ''}`,
+    subject: `New requirement request: ${sanitizeForSubject(submission.name)}${submission.company ? ` (${sanitizeForSubject(submission.company)})` : ''}`,
     html: `
       <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
         <p>A new Special Requirement submission just came in.</p>
@@ -167,7 +167,53 @@ export async function sendWeeklyDigest(stats) {
         <p><strong>Top pages this week:</strong></p>
         <ul>${topPageRows || '<li>No visits recorded.</li>'}</ul>
 
+        ${followUpHtml(stats.followUps)}
+
         <p style="margin-top: 24px;">View full details in the <a href="${escapeHtml(stats.dashboardUrl)}">admin panel</a>.</p>
+      </div>
+    `,
+  });
+}
+
+// Plain-text reply from the admin panel to a lead. The body is escaped and
+// line breaks kept, so whatever the team member types is sent exactly as
+// written. replyTo is the sender's own address so the customer's answer lands
+// in their inbox, not a no-reply mailbox.
+export async function sendLeadReply({ to, subject, body, replyTo }) {
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6; white-space: pre-wrap;">${escapeHtml(body)}</div>
+  `;
+  return safeSend({
+    to,
+    subject: sanitizeForSubject(subject).slice(0, 200),
+    html,
+    text: body,
+    ...(replyTo ? { replyTo } : {}),
+  });
+}
+
+function followUpHtml(items) {
+  if (!items || items.length === 0) return '';
+  const rows = items
+    .map((l) => `<li><strong>${escapeHtml(l.name)}</strong>${l.company ? ` (${escapeHtml(l.company)})` : ''} - ${escapeHtml(l.stage)}, ${escapeHtml(l.reason)}</li>`)
+    .join('');
+  return `<p><strong>Leads that need a follow-up (${items.length}):</strong></p><ul>${rows}</ul>`;
+}
+
+// Daily nudge: only sent when at least one lead is due or has gone quiet.
+export async function sendFollowUpReminder({ items, dashboardUrl }) {
+  if (TEAM_NOTIFY_EMAILS.length === 0) {
+    console.error('Follow-up reminder not sent: TEAM_NOTIFY_EMAILS is empty.');
+    return { ok: false, reason: 'not_configured' };
+  }
+  return safeSend({
+    to: TEAM_NOTIFY_EMAILS,
+    subject: `Orian: ${items.length} lead${items.length === 1 ? '' : 's'} need a follow-up`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6; max-width: 560px;">
+        <h2 style="margin-bottom: 4px;">Follow-ups due</h2>
+        ${followUpHtml(items)}
+        <p style="margin-top: 24px;">Open the <a href="${escapeHtml(dashboardUrl)}">lead board</a> to reply or reschedule.</p>
       </div>
     `,
   });
@@ -179,4 +225,18 @@ function escapeHtml(str = '') {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// Subject lines only ever need HTML-escaping for the two alert emails built
+// from admin-table data (targetName/targetEmail), but sendTeamAlert's
+// subject is built straight from an anonymous public form submission
+// (submission.name / submission.company). Resend's API takes subject as a
+// plain JSON field rather than a raw SMTP header, so classic CRLF header
+// injection isn't the concern it would be with hand-built headers — this
+// is just cheap hardening against stray control characters ending up in a
+// subject line at all.
+function sanitizeForSubject(str = '') {
+  return String(str)
+    .replace(/[\r\n\t\0]+/g, ' ')
+    .trim();
 }

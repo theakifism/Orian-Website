@@ -4,13 +4,6 @@ import TypewriterText from './o2/TypewriterText';
 import AiOrb from './o2/AiOrb';
 import useInView from '../hooks/useInView';
 
-// Same Cloudflare Turnstile site key used by the contact form and admin
-// login (see api/_lib/turnstile.js) — safe to expose, only the secret key
-// verified server-side is sensitive. Rendered in invisible mode here so a
-// chat widget doesn't have to show a visible checkbox before every message;
-// Cloudflare only surfaces a visible challenge if it judges a request risky.
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
-
 const GREETING =
   "Hi, I'm Orian AI. Ask me about bulk SMS, DLT registration, OTP delivery, or our Voice and WhatsApp services.";
 
@@ -52,99 +45,7 @@ const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '
   const streamRef = useRef(null); // the chat box's own scrollable container
   const stickRef = useRef(true); // follow new text unless the visitor scrolled up
   const taRef = useRef(null); // composer textarea (auto-grows)
-  const turnstileRef = useRef(null);
-  const tokenRef = useRef('');
-  const widgetIdRef = useRef(null);
-  const tokenResolverRef = useRef(null);
-
   const busy = isTyping || streaming;
-
-  // Loads Cloudflare's Turnstile script once and renders an invisible,
-  // manually-triggered widget (execution: 'execute' means it sits idle
-  // until getTurnstileToken() below explicitly fires it — it does NOT
-  // verify on mount, only right before a message is actually sent).
-  useEffect(() => {
-    if (!TURNSTILE_SITE_KEY) return undefined;
-
-    const renderWidget = () => {
-      if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) return;
-      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-        sitekey: TURNSTILE_SITE_KEY,
-        appearance: 'interaction-only',
-        // Solve in the background as soon as the widget loads, so a token is
-        // usually ready before the visitor presses send (much more reliable
-        // on slow mobile connections than solving at send time).
-        execution: 'render',
-        'refresh-expired': 'auto',
-        callback: (token) => {
-          if (tokenResolverRef.current) {
-            tokenResolverRef.current(token);
-            tokenResolverRef.current = null;
-          } else {
-            tokenRef.current = token;
-          }
-        },
-        'expired-callback': () => {
-          tokenRef.current = '';
-        },
-        'error-callback': () => {
-          tokenRef.current = '';
-          tokenResolverRef.current?.('');
-          tokenResolverRef.current = null;
-        },
-      });
-    };
-
-    if (window.turnstile) {
-      renderWidget();
-      return undefined;
-    }
-
-    const existing = document.getElementById('cf-turnstile-script');
-    if (!existing) {
-      const script = document.createElement('script');
-      script.id = 'cf-turnstile-script';
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    }
-    const interval = setInterval(() => {
-      if (window.turnstile) {
-        clearInterval(interval);
-        renderWidget();
-      }
-    }, 200);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Resolves with a fresh, single-use token right before each send. Falls
-  // back to an empty string (rather than hanging the chat forever) if
-  // Turnstile isn't configured, hasn't finished loading yet, or Cloudflare
-  // never calls back within a few seconds — the server treats a missing
-  // token as a normal verification failure, same as any other bad token.
-  const getTurnstileToken = () => {
-    if (!TURNSTILE_SITE_KEY) return Promise.resolve('');
-
-    // A token solved in the background is ready: use it (single-use).
-    if (tokenRef.current) {
-      const ready = tokenRef.current;
-      tokenRef.current = '';
-      return Promise.resolve(ready);
-    }
-    if (!window.turnstile || !widgetIdRef.current) return Promise.resolve('');
-
-    // Not ready yet: wait for it (up to 25s, long enough for slow phones).
-    return new Promise((resolve) => {
-      tokenResolverRef.current = resolve;
-      window.setTimeout(() => {
-        if (tokenResolverRef.current === resolve) {
-          tokenResolverRef.current = null;
-          resolve('');
-        }
-      }, 25000);
-    });
-  };
 
   // Scrolling stays inside the chat box (never the page). While an answer is
   // being typed out the box follows the newest text, unless the visitor has
@@ -180,7 +81,6 @@ const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '
     if (!userText) setInput('');
     setIsTyping(true);
 
-    const turnstileToken = await getTurnstileToken();
     let replyId = null;
 
     try {
@@ -190,7 +90,6 @@ const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '
         body: JSON.stringify({
           message: textToSend,
           history, // send prior turns so the AI has context
-          turnstileToken,
         }),
       });
 
@@ -368,10 +267,6 @@ const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '
             </div>
           )}
         </div>
-
-        {/* Cloudflare Turnstile mounts here - invisible unless it decides
-              a challenge is needed, so this has no visual footprint. */}
-        {TURNSTILE_SITE_KEY && <div ref={turnstileRef} />}
 
         <form
           onSubmit={(e) => { e.preventDefault(); handleSend(); }}

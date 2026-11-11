@@ -115,3 +115,21 @@ export const ChevronIcon = ({ className = 'w-5 h-5' }) => (
     <path d="M6 9l6 6 6-6" />
   </svg>
 );
+
+// Three connected nodes — used for social media handling.
+export const ShareIcon = ({ className = 'w-6 h-6' }) => (
+  <svg {...base} className={className}>
+    <circle cx="6" cy="12" r="2.6" />
+    <circle cx="18" cy="5.5" r="2.6" />
+    <circle cx="18" cy="18.5" r="2.6" />
+    <path d="M8.3 10.8l7.4-4.1M8.3 13.2l7.4 4.1" />
+  </svg>
+);
+
+// Code brackets inside a window — used for IT solutions.
+export const CodeIcon = ({ className = 'w-6 h-6' }) => (
+  <svg {...base} className={className}>
+    <rect x="3" y="4.5" width="18" height="15" rx="2.2" />
+    <path d="M10 9.5l-2.5 2.5L10 14.5M14 9.5l2.5 2.5L14 14.5" />
+  </svg>
+);

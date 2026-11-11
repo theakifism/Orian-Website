@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { requireAdmin, signAdminToken, setAdminSessionCookie } from '../auth.js';
 import { requireSupabase } from '../supabase.js';
+import { logAudit } from '../audit.js';
 
 const MIN_LENGTH = 10;
 
@@ -66,5 +67,6 @@ export default requireAdmin(async (req, res) => {
   const token = signAdminToken({ id: req.admin.sub, email: req.admin.email, name: req.admin.name, role: req.admin.role }, newSessionVersion);
   setAdminSessionCookie(res, token);
 
+  await logAudit(supabase, req, 'account.password', { targetType: 'admin', targetId: req.admin.sub, detail: 'Changed their own password' });
   return res.status(200).json({ ok: true });
 });

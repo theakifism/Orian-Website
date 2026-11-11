@@ -1,28 +1,18 @@
 import { SITE_NAME } from './siteConfig';
 
-const clamp = (str, max) => (str.length <= max ? str : `${str.slice(0, max - 1).trimEnd()}…`);
+// Hand-written metadata lives on each data entry (metaTitle / metaDescription in
+// src/data/industries.js and whyUs.js). The fallbacks below are only a safety net for
+// an entry added without metadata; they never truncate with an ellipsis.
+export const buildIndustryMeta = (industry) => ({
+  title: industry.metaTitle || `${industry.name} Bulk SMS API | ${SITE_NAME}`,
+  description:
+    industry.metaDescription ||
+    `${industry.blurb} Talk to ${SITE_NAME} about bulk SMS, voice API and WhatsApp API for ${industry.name}.`,
+});
 
-/**
- * Builds a unique title/description for an /industries/:slug page from the
- * industry's own data (name + blurb). There are 24 industries, so these are
- * generated rather than hand-written — still unique per page and grounded
- * in real page content, just not hand-tuned to an exact character count
- * the way the primary keyword pages (home/services/service-detail) are.
- */
-export const buildIndustryMeta = (industry) => {
-  const title = clamp(`${industry.name} Bulk SMS & WhatsApp API | ${SITE_NAME}`, 60);
-  const description = clamp(
-    `${industry.blurb} ${SITE_NAME} delivers bulk SMS, voice API and WhatsApp API built for ${industry.name.toLowerCase()} businesses across India.`,
-    160,
-  );
-  return { title, description };
-};
-
-/**
- * Same idea for /why-us/:slug pages, built from the reason's title + desc.
- */
-export const buildWhyUsMeta = (reason) => {
-  const title = clamp(`${reason.title} | Why Choose ${SITE_NAME}`, 60);
-  const description = clamp(`${reason.desc} See why enterprises trust ${SITE_NAME} for bulk SMS, voice API and WhatsApp API delivery.`, 160);
-  return { title, description };
-};
+export const buildWhyUsMeta = (reason) => ({
+  title: reason.metaTitle || `${reason.title} | ${SITE_NAME}`,
+  description:
+    reason.metaDescription ||
+    `${reason.desc} See why businesses choose ${SITE_NAME} for bulk SMS, voice API and WhatsApp API.`,
+});

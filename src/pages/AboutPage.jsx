@@ -3,13 +3,15 @@ import PageHeader from '../components/PageHeader';
 import Seo from '../seo/Seo';
 import { pageMeta } from '../seo/pageMeta';
 import About from '../components/About';
-import Interactive3DNetwork from '../components/Interactive3DNetwork';
+import Reveal from '../components/Reveal';
+import { litCardProps } from '../utils/litCard';
+import { ShieldDoodle, RouteDoodle } from '../components/DoodleIcons';
+import { PLATFORM_DELIVERY_RATE, PLATFORM_UPTIME } from '../data/homeCopy';
+import PageContent from '../components/PageContent';
 
 const milestones = [
-  { year: '15+ yrs', label: 'Combined industry experience across founders' },
-  { year: '1,200+', label: 'Direct operator routes connected' },
-  { year: '180+', label: 'Countries reachable today' },
-  { year: '99.99%', label: 'Uptime SLA maintained' },
+  { value: `${PLATFORM_UPTIME}%`, label: 'Platform uptime', Doodle: ShieldDoodle },
+  { value: `${PLATFORM_DELIVERY_RATE}%`, label: 'Message delivery rate', Doodle: RouteDoodle },
 ];
 
 const AboutPage = () => {
@@ -18,40 +20,40 @@ const AboutPage = () => {
       <Seo title={pageMeta.about.title} description={pageMeta.about.description} path={pageMeta.about.path} />
       <PageHeader
         eyebrow="About Orian"
-        title="Built by messaging"
-        gradientWord="industry veterans."
-        subtitle="Fifteen-plus years of handling OTT, enterprise and aggregator traffic, distilled into one platform — SMS, voice and WhatsApp, all from a single dashboard."
+        title="Business messaging"
+        gradientWord="with Orian."
+        subtitle="Explore SMS, voice, WhatsApp and related services, then speak with our team about your requirements."
         breadcrumbs={[{ label: 'About' }]}
       />
 
       <About variant="full" />
 
+      {/* Shared platform metrics, also shown on the homepage and status page. */}
       <section className="relative py-20 bg-transparent overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="order-2 lg:order-1">
-            <Interactive3DNetwork size={300} className="mx-auto" />
-          </div>
-          <div className="space-y-8 order-1 lg:order-2">
-            <div>
-              <span className="text-xs font-mono tracking-widest text-[#00AEEF] uppercase">By The Numbers</span>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-[var(--text)] tracking-tight mt-2">
-                What fifteen years builds
-              </h2>
-            </div>
-            <div className="grid grid-cols-2 gap-5">
-              {milestones.map((m) => (
+        <div className="max-w-5xl mx-auto px-6">
+          <Reveal as="div" className="text-center max-w-2xl mx-auto mb-12">
+            <span className="text-xs font-mono tracking-widest text-[#00AEEF] uppercase">Platform metrics</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-(--text) tracking-tight mt-2">
+              Service performance
+            </h2>
+          </Reveal>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
+            {milestones.map((m, i) => (
+              <Reveal as="div" key={m.label} delay={i * 80}>
                 <div
-                  key={m.label}
-                  className="p-5 bg-[var(--surface)]/90 border border-[var(--border)] rounded-2xl hover:border-[#00AEEF]/50 hover:shadow-[0_0_25px_rgba(0,174,239,0.2)] transition-all duration-300"
+                  {...litCardProps('#00AEEF', 'rgba(0, 0, 0, 0.6)', { tilt: false })}
+                  className="h-full p-5 bg-(--surface)/90 border border-(--border) rounded-2xl transition-all duration-300 text-center flex flex-col items-center"
                 >
-                  <div className="text-2xl md:text-3xl font-extrabold font-mono text-[#00AEEF]">{m.year}</div>
-                  <div className="text-xs text-[var(--text-faint)] mt-1 leading-snug">{m.label}</div>
+                  <m.Doodle color="#00AEEF" className="mb-5" />
+                  <div className="text-2xl md:text-3xl font-extrabold font-mono text-[#00AEEF]">{m.value}</div>
+                  <div className="text-xs text-(--text-faint) mt-1 leading-snug">{m.label}</div>
                 </div>
-              ))}
-            </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
+    <PageContent id="about" />
     </>
   );
 };

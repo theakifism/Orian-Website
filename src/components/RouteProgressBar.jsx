@@ -28,7 +28,7 @@ const RouteProgressBar = () => {
   return (
     <div
       aria-hidden="true"
-      className={`fixed top-0 left-0 h-[3px] z-[60] bg-linear-to-r from-[#00AEEF] via-purple-400 to-[#E8A23D] ${
+      className={`fixed top-0 left-0 h-[3px] z-[60] bg-[#00AEEF] ${
         visible ? 'route-bar-run' : 'w-0 opacity-0'
       }`}
     />

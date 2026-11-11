@@ -1,5 +1,6 @@
 import { requireAdmin } from '../auth.js';
 import { requireSupabase } from '../supabase.js';
+import { logAudit } from '../audit.js';
 
 const MAX_MESSAGE_LEN = 200;
 
@@ -48,6 +49,7 @@ export default requireAdmin(async (req, res) => {
       console.error('Failed to create announcement:', error.message);
       return res.status(500).json({ error: 'Could not create announcement.' });
     }
+    await logAudit(supabase, req, 'announcement.create', { targetType: 'announcement', targetId: data.id, detail: trimmed.slice(0, 120) });
     return res.status(200).json({ announcement: data });
   }
 
@@ -61,6 +63,7 @@ export default requireAdmin(async (req, res) => {
       console.error('Failed to update announcement:', error.message);
       return res.status(500).json({ error: 'Could not update announcement.' });
     }
+    await logAudit(supabase, req, 'announcement.toggle', { targetType: 'announcement', targetId: id, detail: active ? 'Turned on' : 'Turned off' });
     return res.status(200).json({ ok: true });
   }
 
@@ -72,6 +75,7 @@ export default requireAdmin(async (req, res) => {
       console.error('Failed to delete announcement:', error.message);
       return res.status(500).json({ error: 'Could not delete announcement.' });
     }
+    await logAudit(supabase, req, 'announcement.delete', { targetType: 'announcement', targetId: id });
     return res.status(200).json({ ok: true });
   }
 

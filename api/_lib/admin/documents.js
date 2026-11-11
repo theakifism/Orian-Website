@@ -1,12 +1,18 @@
 import { requireAdmin } from '../auth.js';
 import { requireSupabase } from '../supabase.js';
+import { logAudit } from '../audit.js';
 
 const BUCKET = 'documents';
-// Vercel's serverless functions cap request bodies at ~4.5MB. Since the
-// file arrives as base64 (~33% larger than the original), keep the actual
-// uploaded file comfortably under that after encoding.
-const MAX_FILE_BYTES = 4 * 1024 * 1024; // 4MB original file size
+// Vercel's serverless functions cap request bodies at ~4.5MB. The file
+// arrives base64-encoded (~33% larger than the original) inside a JSON
+// body that also carries the title/description/etc, so the SAFE original
+// file size is well under 4.5MB, not equal to it. 4MB in was already
+// failing for files as small as ~3.3MB (base64 alone pushes them over the
+// limit) with an opaque platform-level error, not this handler's own
+// message. 3MB leaves comfortable headroom.
+const MAX_FILE_BYTES = 3 * 1024 * 1024; // 3MB original file size
 const ALLOWED_TYPES = new Set(['application/pdf']);
+const PDF_MAGIC = Buffer.from('%PDF-');
 
 export default requireAdmin(async (req, res) => {
   let supabase;
@@ -52,6 +58,11 @@ export default requireAdmin(async (req, res) => {
     if (buffer.length === 0 || buffer.length > MAX_FILE_BYTES) {
       return res.status(400).json({ error: `File must be under ${Math.floor(MAX_FILE_BYTES / (1024 * 1024))}MB.` });
     }
+    // The browser-declared mimeType above is just a client-supplied label —
+    // confirm the bytes actually start with a PDF header before trusting it.
+    if (!buffer.subarray(0, 5).equals(PDF_MAGIC)) {
+      return res.status(400).json({ error: 'That file does not look like a valid PDF.' });
+    }
 
     const safeName = (filename || 'document.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
     const path = `${Date.now()}-${safeName}`;
@@ -85,6 +96,7 @@ export default requireAdmin(async (req, res) => {
       return res.status(500).json({ error: 'Could not save the document.' });
     }
 
+    await logAudit(supabase, req, 'document.upload', { targetType: 'document', targetId: data.id, detail: data.title });
     return res.status(200).json({ document: data });
   }
 
@@ -107,6 +119,7 @@ export default requireAdmin(async (req, res) => {
       console.error('Failed to delete document record:', deleteError.message);
       return res.status(500).json({ error: 'Could not delete the document.' });
     }
+    await logAudit(supabase, req, 'document.delete', { targetType: 'document', targetId: id });
     return res.status(200).json({ ok: true });
   }
 

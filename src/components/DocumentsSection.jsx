@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { litCardProps } from '../utils/litCard';
+import { T } from '../content';
 
 const formatSize = (bytes) => {
   if (!bytes) return '';
@@ -20,8 +22,8 @@ const DocumentsSection = () => {
 
   return (
     <section id="documents" className="py-20 px-6 max-w-5xl mx-auto">
-      <h2 className="text-3xl font-bold text-[var(--text)] mb-2">Documents & Downloads</h2>
-      <p className="text-[var(--text-dim)] mb-8">Compliance documents, rate cards, and other resources.</p>
+      <h2 className="text-3xl font-bold text-[var(--text)] mb-2"><T k="DocumentsSection.1" d={"Documents & Downloads"} /></h2>
+      <p className="text-[var(--text-dim)] mb-8"><T k="DocumentsSection.2" d={"Compliance documents, rate cards, and other resources."} /></p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {documents.map((doc) => (
@@ -30,7 +32,8 @@ const DocumentsSection = () => {
             href={doc.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-start gap-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 hover:border-[#00AEEF] transition-colors"
+            {...litCardProps('#00AEEF', 'rgba(0, 174, 239, 0.35)', { tilt: false })}
+            className="flex items-start gap-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 transition-colors"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[#00AEEF] shrink-0 mt-0.5">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />

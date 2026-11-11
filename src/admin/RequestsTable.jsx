@@ -1,17 +1,14 @@
-import { Fragment, useMemo, useState } from 'react';
-import { ArrowUp, ArrowDown, Download, Search, MessageSquarePlus, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import { ArrowUp, ArrowDown, Download, Search, MessageSquarePlus, ChevronDown, ChevronUp, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Skeleton from './Skeleton';
 import { downloadCsv } from './csv';
+import { ALL_STAGES, stageMeta } from './leadMeta';
 
-const STATUS_STYLES = {
-  new: 'bg-[#00AEEF]/15 text-[#00AEEF]',
-  contacted: 'bg-amber-500/15 text-amber-500',
-  closed: 'bg-emerald-500/15 text-emerald-500',
-};
+const StageOptions = () => ALL_STAGES.map((st) => <option key={st.key} value={st.key}>{st.label}</option>);
 
 const StatusBadge = ({ status }) => (
-  <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${STATUS_STYLES[status] || ''}`}>
-    {status}
+  <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold ${stageMeta(status).badge}`}>
+    {stageMeta(status).label}
   </span>
 );
 
@@ -35,8 +32,13 @@ const RequestsTable = ({
   admins = [],
   onAssign,
   onAddNote,
+  onOpenLead,
   filters,
   onFiltersChange,
+  page = 1,
+  total = 0,
+  pageSize = 50,
+  onPageChange,
 }) => {
   const [sortKey, setSortKey] = useState('created_at');
   const [sortDir, setSortDir] = useState('desc');
@@ -45,6 +47,15 @@ const RequestsTable = ({
   const [noteDraft, setNoteDraft] = useState('');
   const [savingNote, setSavingNote] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+
+  // A fresh page/filter/search result is a different set of rows entirely —
+  // carrying a selection or an expanded note panel over from the previous
+  // page just leads to bulk actions silently hitting rows the admin can no
+  // longer see. Reset both whenever the underlying data changes.
+  useEffect(() => {
+    setSelected(new Set());
+    setExpandedId(null);
+  }, [requests]);
 
   const sorted = useMemo(() => {
     if (!requests) return [];
@@ -131,15 +142,32 @@ const RequestsTable = ({
     setNoteDraft('');
   };
 
-  if (loading) {
-    return (
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 space-y-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full" />
-        ))}
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = Math.min(page * pageSize, total);
+
+  const PaginationBar = () =>
+    totalPages > 1 ? (
+      <div className="flex items-center justify-between gap-3 mt-4 flex-wrap">
+        <p className="text-xs text-[var(--text-dim)]">Page {page} of {totalPages}</p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onPageChange?.(page - 1)}
+            disabled={page <= 1}
+            className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] disabled:opacity-40 disabled:hover:bg-[var(--overlay)] transition-colors"
+          >
+            <ChevronLeft size={13} /> Previous
+          </button>
+          <button
+            onClick={() => onPageChange?.(page + 1)}
+            disabled={page >= totalPages}
+            className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] disabled:opacity-40 disabled:hover:bg-[var(--overlay)] transition-colors"
+          >
+            Next <ChevronRight size={13} />
+          </button>
+        </div>
       </div>
-    );
-  }
+    ) : null;
 
   return (
     <div>
@@ -153,7 +181,7 @@ const RequestsTable = ({
               value={filters?.q || ''}
               onChange={(e) => setFilter('q', e.target.value)}
               placeholder="Search by name or email…"
-              className="w-full bg-[var(--overlay)] border border-[var(--border)] rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none focus:border-[#00AEEF]"
+              className="w-full bg-[var(--overlay)] border border-[var(--border)] rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/40"
             />
           </div>
           <button
@@ -178,9 +206,7 @@ const RequestsTable = ({
                 className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs"
               >
                 <option value="">All</option>
-                <option value="new">New</option>
-                <option value="contacted">Contacted</option>
-                <option value="closed">Closed</option>
+                <StageOptions />
               </select>
             </div>
             <div>
@@ -229,7 +255,11 @@ const RequestsTable = ({
 
       <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
         <div className="text-sm text-[var(--text-dim)]">
-          {selected.size > 0 ? `${selected.size} selected` : `${sorted.length} request${sorted.length === 1 ? '' : 's'}`}
+          {selected.size > 0
+            ? `${selected.size} selected`
+            : total > 0
+              ? `Showing ${rangeStart}–${rangeEnd} of ${total} request${total === 1 ? '' : 's'}`
+              : `${sorted.length} request${sorted.length === 1 ? '' : 's'}`}
         </div>
         <div className="flex items-center gap-2">
           {selected.size > 0 && (
@@ -239,16 +269,15 @@ const RequestsTable = ({
               className="bg-[var(--overlay)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs"
             >
               <option value="" disabled>Set status…</option>
-              <option value="new">New</option>
-              <option value="contacted">Contacted</option>
-              <option value="closed">Closed</option>
+              <StageOptions />
             </select>
           )}
           <button
             onClick={handleExport}
+            title="Exports only the requests currently loaded on this page"
             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] transition-colors"
           >
-            <Download size={13} /> Export CSV
+            <Download size={13} /> Export CSV (this page)
           </button>
         </div>
       </div>
@@ -285,7 +314,15 @@ const RequestsTable = ({
             </tr>
           </thead>
           <tbody>
-            {sorted.map((r, i) => {
+            {loading &&
+              Array.from({ length: 6 }).map((_, i) => (
+                <tr key={`skeleton-${i}`} className="border-b border-[var(--border)] last:border-0">
+                  <td colSpan={COLUMNS.length + 2} className="px-4 py-3">
+                    <Skeleton className="h-6 w-full" />
+                  </td>
+                </tr>
+              ))}
+            {!loading && sorted.map((r, i) => {
               const noteCount = Array.isArray(r.notes) ? r.notes.length : 0;
               const isExpanded = expandedId === r.id;
               return (
@@ -330,15 +367,13 @@ const RequestsTable = ({
                         onChange={(e) => onUpdateStatus(r.id, e.target.value)}
                         className="bg-[var(--overlay)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs mb-1"
                       >
-                        <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="closed">Closed</option>
+                        <StageOptions />
                       </select>
                       <div><StatusBadge status={r.status} /></div>
                     </td>
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => openNotes(r)}
+                        onClick={() => (onOpenLead ? onOpenLead(r) : openNotes(r))}
                         title="Internal notes"
                         className={`flex items-center gap-1 text-xs px-1.5 py-1 rounded-md transition-colors ${
                           noteCount > 0 ? 'text-[#00AEEF]' : 'text-[var(--text-faint)] hover:text-[var(--text)]'
@@ -377,12 +412,12 @@ const RequestsTable = ({
                             onChange={(e) => setNoteDraft(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && submitNote(r.id)}
                             placeholder='e.g. "Called, no answer — retry Friday"'
-                            className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00AEEF]"
+                            className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/40"
                           />
                           <button
                             onClick={() => submitNote(r.id)}
                             disabled={savingNote || !noteDraft.trim()}
-                            className="bg-[#00AEEF] hover:bg-[#E8A23D] text-black text-xs font-semibold px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
+                            className="bg-[#00AEEF] hover:bg-[#34D399] text-black text-xs font-semibold px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
                           >
                             {savingNote ? 'Saving…' : 'Add note'}
                           </button>
@@ -393,7 +428,7 @@ const RequestsTable = ({
                 </Fragment>
               );
             })}
-            {sorted.length === 0 && (
+            {!loading && sorted.length === 0 && (
               <tr>
                 <td colSpan={COLUMNS.length + 2} className="px-4 py-10 text-center text-[var(--text-dim)]">
                   No requests match these filters.
@@ -403,11 +438,20 @@ const RequestsTable = ({
           </tbody>
         </table>
       </div>
+      <div className="hidden md:block">
+        <PaginationBar />
+      </div>
 
       {/* Mobile: stacked cards instead of a table that needed horizontal
           scrolling to read past 2-3 columns on a phone screen. */}
       <div className="md:hidden space-y-3">
-        {sorted.map((r) => {
+        {loading &&
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={`skeleton-${i}`} className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4">
+              <Skeleton className="h-16 w-full" />
+            </div>
+          ))}
+        {!loading && sorted.map((r) => {
           const noteCount = Array.isArray(r.notes) ? r.notes.length : 0;
           const isExpanded = expandedId === r.id;
           return (
@@ -440,9 +484,7 @@ const RequestsTable = ({
                       onChange={(e) => onUpdateStatus(r.id, e.target.value)}
                       className="bg-[var(--overlay)] border border-[var(--border)] rounded-lg px-2 py-2 text-xs flex-1 min-w-[110px]"
                     >
-                      <option value="new">New</option>
-                      <option value="contacted">Contacted</option>
-                      <option value="closed">Closed</option>
+                      <StageOptions />
                     </select>
                     <select
                       value={r.assigned_to || ''}
@@ -457,7 +499,7 @@ const RequestsTable = ({
                   </div>
 
                   <button
-                    onClick={() => openNotes(r)}
+                    onClick={() => (onOpenLead ? onOpenLead(r) : openNotes(r))}
                     className={`tap-feedback flex items-center gap-1.5 text-xs mt-3 px-2 py-1.5 -mx-2 rounded-md transition-colors ${
                       noteCount > 0 ? 'text-[#00AEEF]' : 'text-[var(--text-faint)]'
                     }`}
@@ -489,12 +531,12 @@ const RequestsTable = ({
                           onChange={(e) => setNoteDraft(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && submitNote(r.id)}
                           placeholder='e.g. "Called, no answer — retry Friday"'
-                          className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00AEEF]"
+                          className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/40"
                         />
                         <button
                           onClick={() => submitNote(r.id)}
                           disabled={savingNote || !noteDraft.trim()}
-                          className="tap-feedback bg-[#00AEEF] hover:bg-[#E8A23D] text-black text-xs font-semibold px-3 py-2 rounded-lg transition-colors disabled:opacity-50 shrink-0"
+                          className="tap-feedback bg-[#00AEEF] hover:bg-[#34D399] text-black text-xs font-semibold px-3 py-2 rounded-lg transition-colors disabled:opacity-50 shrink-0"
                         >
                           {savingNote ? 'Saving…' : 'Add'}
                         </button>
@@ -506,11 +548,12 @@ const RequestsTable = ({
             </div>
           );
         })}
-        {sorted.length === 0 && (
+        {!loading && sorted.length === 0 && (
           <div className="text-center text-[var(--text-dim)] py-10 bg-[var(--surface)] border border-[var(--border)] rounded-xl">
             No requests match these filters.
           </div>
         )}
+        <PaginationBar />
       </div>
     </div>
   );

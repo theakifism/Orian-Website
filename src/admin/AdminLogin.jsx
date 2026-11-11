@@ -12,6 +12,9 @@ const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
   const [form, setForm] = useState({ email: '', password: '' });
   // Lazy initializer (not an effect) so this reads sessionStorage exactly
   // once, synchronously, before first paint -- shows a one-time explanation
@@ -126,8 +129,10 @@ const AdminLogin = () => {
       >
         <div className="flex flex-col items-center mb-6">
           <img
-            src="/logo-full.png"
+            src="/logo-full.webp"
             alt="Orian"
+            width="132"
+            height="45"
             className="h-10 w-auto object-contain mb-4"
           />
           <h1 className="text-xl font-bold mb-1">Orian admin</h1>
@@ -144,7 +149,7 @@ const AdminLogin = () => {
           onChange={handleChange}
           required
           autoFocus
-          className="w-full mb-4 bg-[var(--overlay)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00AEEF]"
+          className="w-full mb-4 bg-[var(--overlay)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/40"
         />
 
         <label className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-2">
@@ -156,7 +161,7 @@ const AdminLogin = () => {
           value={form.password}
           onChange={handleChange}
           required
-          className="w-full mb-6 bg-[var(--overlay)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00AEEF]"
+          className="w-full mb-6 bg-[var(--overlay)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/40"
         />
 
         {TURNSTILE_SITE_KEY && <div ref={turnstileRef} className="mb-6 flex justify-center" />}
@@ -166,7 +171,7 @@ const AdminLogin = () => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-[#00AEEF] hover:bg-[#E8A23D] text-black font-semibold py-3 rounded-xl text-sm transition-all shadow-[0_0_15px_rgba(0,174,239,0.3)] hover:shadow-[0_0_20px_rgba(232,162,61,0.6)] disabled:opacity-50"
+          className="w-full bg-[#00AEEF] hover:bg-[#34D399] text-black font-semibold py-3 rounded-xl text-sm transition-all shadow-[0_0_15px_rgba(0,174,239,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.6)] disabled:opacity-50"
         >
           {submitting ? 'Signing in...' : 'Sign in'}
         </button>

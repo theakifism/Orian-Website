@@ -3,7 +3,7 @@ import { Sparkles, RefreshCw } from 'lucide-react';
 
 // Splits the plain-text response from the API into a headline paragraph and
 // a bullet list, based on the "Headline: ... / Suggested actions: - ..."
-// structure the Gemini prompt is instructed to always follow.
+// structure the AI prompt is instructed to always follow.
 function parseInsights(text) {
   const actionsIdx = text.indexOf('Suggested actions:');
   const headline = (actionsIdx >= 0 ? text.slice(0, actionsIdx) : text)
@@ -38,23 +38,23 @@ const AIInsights = () => {
   };
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-[#00AEEF]/10 via-[var(--surface)] to-purple-500/10 border border-[var(--border)] rounded-xl p-5 mb-6">
+    <div className="relative overflow-hidden bg-linear-to-br from-[#00AEEF]/10 via-(--surface) to-purple-500/10 border border-(--border) rounded-xl p-5 mb-6">
       <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#00AEEF]/20 rounded-full blur-3xl pointer-events-none" />
       <div className="relative z-10">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00AEEF] to-purple-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-linear-to-br from-[#00AEEF] to-purple-500 flex items-center justify-center">
               <Sparkles size={15} className="text-white" />
             </div>
             <div>
               <h3 className="text-sm font-semibold">AI Insights</h3>
-              <p className="text-xs text-[var(--text-faint)]">Auto-generated summary of the last 14 days</p>
+              <p className="text-xs text-(--text-faint)">Auto-generated summary of the last 14 days</p>
             </div>
           </div>
           <button
             onClick={generate}
             disabled={state === 'loading'}
-            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#00AEEF] hover:bg-[#E8A23D] text-black transition-colors disabled:opacity-60"
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#00AEEF] hover:bg-[#34D399] text-black transition-colors disabled:opacity-60"
           >
             <RefreshCw size={12} className={state === 'loading' ? 'animate-spin' : ''} />
             {state === 'loading' ? 'Thinking…' : insights ? 'Regenerate' : 'Generate insights'}
@@ -64,7 +64,7 @@ const AIInsights = () => {
         {state === 'error' && <p className="text-sm text-red-400 mt-4">{error}</p>}
 
         {state === 'idle' && (
-          <p className="text-sm text-[var(--text-dim)] mt-4">
+          <p className="text-sm text-(--text-dim) mt-4">
             Get an instant, plain-English read on your leads and traffic — trends, standouts, and what to do about them.
           </p>
         )}
@@ -82,7 +82,7 @@ const AIInsights = () => {
                 ))}
               </ul>
             )}
-            <p className="text-[10px] text-[var(--text-faint)] mt-3">
+            <p className="text-[10px] text-(--text-faint) mt-3">
               Generated {new Date(insights.generatedAt).toLocaleString()}
             </p>
           </div>

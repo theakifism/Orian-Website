@@ -38,11 +38,23 @@ async function main() {
     process.exit(1);
   }
 
+  // The FIRST admin account has to be 'superadmin' — otherwise nobody could
+  // ever unlock an account or promote anyone else through the panel, since
+  // those actions themselves require 'superadmin'. After that, ask.
+  const { count: existingCount } = await supabase.from('admins').select('id', { count: 'exact', head: true });
+  let role = 'superadmin';
+  if (existingCount > 0) {
+    const answer = (await rl.question("Role — 'superadmin' (can manage the team) or 'employee' [employee]: ")).trim().toLowerCase();
+    role = answer === 'superadmin' ? 'superadmin' : 'employee';
+  } else {
+    console.log("No admins exist yet — creating this account with the 'superadmin' role.");
+  }
+
   const password_hash = await bcrypt.hash(password, 12);
 
   const { error } = await supabase
     .from('admins')
-    .insert({ name, email, password_hash, role: 'employee' });
+    .insert({ name, email, password_hash, role });
 
   if (error) {
     console.error('Failed to create admin:', error.message);

@@ -1,0 +1,272 @@
+{
+ "careers/corporate.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "careers/customer-care.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "careers/technical.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "contact/office-front.webp": {
+  "w": 1584,
+  "h": 672,
+  "sm": 720
+ },
+ "help-center/hero-person.webp": {
+  "w": 1100,
+  "h": 1365,
+  "sm": 720
+ },
+ "home/banner-team.webp": {
+  "w": 1584,
+  "h": 672,
+  "sm": 720
+ },
+ "home/bento-compliance.webp": {
+  "w": 1600,
+  "h": 873,
+  "sm": 720
+ },
+ "home/bento-golive.webp": {
+  "w": 1600,
+  "h": 873,
+  "sm": 720
+ },
+ "home/mosaic-1.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "home/mosaic-2.webp": {
+  "w": 1600,
+  "h": 873,
+  "sm": 720
+ },
+ "industries/automobiles.webp": {
+  "w": 1600,
+  "h": 873,
+  "sm": 720
+ },
+ "industries/banking.webp": {
+  "w": 1600,
+  "h": 873,
+  "sm": 720
+ },
+ "industries/corporates.webp": {
+  "w": 1062,
+  "h": 592,
+  "sm": 720
+ },
+ "industries/educational-institutes.webp": {
+  "w": 1062,
+  "h": 592,
+  "sm": 720
+ },
+ "industries/fmcg.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "industries/healthcare-hospitals.webp": {
+  "w": 1118,
+  "h": 624,
+  "sm": 720
+ },
+ "industries/hotels-hospitality.webp": {
+  "w": 1600,
+  "h": 873,
+  "sm": 720
+ },
+ "industries/it-services.webp": {
+  "w": 1062,
+  "h": 592,
+  "sm": 720
+ },
+ "industries/media-entertainment.webp": {
+  "w": 1600,
+  "h": 873,
+  "sm": 720
+ },
+ "industries/pharmaceuticals.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "industries/real-estate.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "industries/retail.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "industries/telecom.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "resources/sms-managed-gateway.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "resources/sms-route-redundancy.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "resources/sms-sender-id.webp": {
+  "w": 1600,
+  "h": 873,
+  "sm": 720
+ },
+ "resources/whatsapp-chatbot-flow.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "resources/whatsapp-rich-media.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "resources/whatsapp-vs-sms.webp": {
+  "w": 1600,
+  "h": 873,
+  "sm": 720
+ },
+ "services/bulk-sms-otp-gateways.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "services/dlt-compliance.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "services/voice-sms-ivr.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "services/whatsapp-business-api.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "team/founders.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "team/office.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "testimonial/client-1.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "why-us/best-price-guarantee.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "why-us/high-speed-delivery.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "why-us/instant-dlt-quick-setup.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "why-us/safe-effective-delegation.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "why-us/strong-carrier-network.webp": {
+  "w": 1376,
+  "h": 768,
+  "sm": 720
+ },
+ "why-us/support-247.webp": {
+  "w": 1408,
+  "h": 768,
+  "sm": 720
+ },
+ "o2/compliance-desk.webp": {
+  "w": 987,
+  "h": 538
+ },
+ "o2/go-live.webp": {
+  "w": 1280,
+  "h": 698
+ },
+ "o2/ind-banking.webp": {
+  "w": 1280,
+  "h": 698
+ },
+ "o2/ind-corporates.webp": {
+  "w": 1062,
+  "h": 592
+ },
+ "o2/ind-education.webp": {
+  "w": 1062,
+  "h": 592
+ },
+ "o2/ind-healthcare.webp": {
+  "w": 1118,
+  "h": 624
+ },
+ "o2/ind-it.webp": {
+  "w": 1062,
+  "h": 592
+ },
+ "o2/ind-retail.webp": {
+  "w": 1280,
+  "h": 714
+ },
+ "o2/support-desk.webp": {
+  "w": 1280,
+  "h": 698
+ },
+ "o2/team-office.webp": {
+  "w": 1280,
+  "h": 714
+ },
+ "o2/team-planning.webp": {
+  "w": 1280,
+  "h": 698
+ },
+ "o2/uc-alerts.webp": {
+  "w": 1280,
+  "h": 698
+ },
+ "o2/uc-campaigns.webp": {
+  "w": 1280,
+  "h": 714
+ },
+ "o2/uc-otp.webp": {
+  "w": 1280,
+  "h": 714
+ },
+ "o2/uc-reminders.webp": {
+  "w": 1118,
+  "h": 624
+ }
+}

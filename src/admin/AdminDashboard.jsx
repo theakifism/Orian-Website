@@ -1,37 +1,79 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Moon, Bell, LogOut } from 'lucide-react';
-import Sidebar from './Sidebar';
-import MobileTabBar from './MobileTabBar';
-import MetricCard from './MetricCard';
-import RequestsTable from './RequestsTable';
-import VisitorsPanel from './VisitorsPanel';
-import ContentPanel from './ContentPanel';
+import TopNav from './TopNav';
+import { TABS } from './adminTabs';
+import OverviewPanel from './OverviewPanel';
+import LeadsPanel from './LeadsPanel';
+import LeadDrawer from './LeadDrawer';
+import AnalyticsPanel from './AnalyticsPanel';
+import SitePanel from './SitePanel';
+import SystemPanel from './SystemPanel';
 import SettingsPanel from './SettingsPanel';
-import AIInsights from './AIInsights';
-import useTheme from '../hooks/useTheme';
+import { PageHead } from './ui';
+import './admin.css';
 
 const EMPTY_FILTERS = { q: '', status: '', dateFrom: '', dateTo: '', assignedTo: '' };
+const REQUEST_PAGE_SIZE = 50;
+
+const HEADINGS = {
+  overview: { eyebrow: 'Dashboard', title: (a) => `Welcome back${a?.name ? `, ${a.name.split(' ')[0]}` : ''}` },
+  leads: { eyebrow: 'Pipeline', title: () => 'Leads' },
+  analytics: { eyebrow: 'Insights', title: () => 'Analytics' },
+  site: { eyebrow: 'Website', title: () => 'Announcements & documents' },
+  system: { eyebrow: 'Operations', title: () => 'System' },
+  settings: { eyebrow: 'Account', title: () => 'Settings' },
+};
+
+const tabFromHash = () => {
+  const key = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+  return TABS.some((t) => t.key === key) ? key : 'overview';
+};
 
 const AdminDashboard = ({ admin }) => {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
-  const [tab, setTab] = useState('requests');
-  const [collapsed, setCollapsed] = useState(false);
+  const [tab, setTabState] = useState(tabFromHash);
 
   const [visitorData, setVisitorData] = useState(null);
   const [requestData, setRequestData] = useState(null);
   const [admins, setAdmins] = useState([]);
   const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [requestPage, setRequestPage] = useState(1);
+  const [visitorPage, setVisitorPage] = useState(1);
   const [loadError, setLoadError] = useState('');
   const [loadingVisitors, setLoadingVisitors] = useState(true);
   const [loadingRequests, setLoadingRequests] = useState(true);
 
-  const fetchVisitors = useCallback(() => {
-    fetch('/api/admin/visitors', { credentials: 'same-origin' })
-      .then((res) => res.json())
+  // The lead drawer is shared by Overview, the board and the table.
+  const [openLead, setOpenLead] = useState(null); // { id, initial? }
+  const [patches, setPatches] = useState({});     // timestamped local edits, see leadMeta.mergePatch
+  const refreshTimer = useRef(null);
+
+  // The admin panel is dark-only, like the public site.
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
+  const setTab = useCallback((next) => {
+    setTabState(next);
+    window.history.replaceState(null, '', next === 'overview' ? window.location.pathname : `#${next}`);
+    window.scrollTo({ top: 0 });
+  }, []);
+
+  useEffect(() => {
+    const onHash = () => setTabState(tabFromHash());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  const fetchVisitors = useCallback((targetPage = 1) => {
+    fetch(`/api/admin/visitors?page=${targetPage}`, { credentials: 'same-origin' })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load visitor data');
+        return res.json();
+      })
       .then((data) => {
         setVisitorData(data);
+        setLoadError('');
         setLoadingVisitors(false);
       })
       .catch(() => {
@@ -40,16 +82,20 @@ const AdminDashboard = ({ admin }) => {
       });
   }, []);
 
-  const fetchRequests = useCallback((activeFilters) => {
+  const fetchRequests = useCallback((activeFilters, targetPage = 1) => {
     const params = new URLSearchParams();
     Object.entries(activeFilters || {}).forEach(([key, value]) => {
       if (value) params.set(key, value);
     });
-    const qs = params.toString();
-    fetch(`/api/admin/requests${qs ? `?${qs}` : ''}`, { credentials: 'same-origin' })
-      .then((res) => res.json())
+    params.set('page', targetPage);
+    fetch(`/api/admin/requests?${params.toString()}`, { credentials: 'same-origin' })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load requests');
+        return res.json();
+      })
       .then((data) => {
-        setRequestData(data);
+        setRequestData({ ...data, __fetchedAt: Date.now() });
+        setLoadError('');
         setLoadingRequests(false);
       })
       .catch(() => {
@@ -69,23 +115,31 @@ const AdminDashboard = ({ admin }) => {
   // the loading state is desirable, e.g. after a bulk update.
   const loadRequests = useCallback(() => {
     setLoadingRequests(true);
-    fetchRequests(filters);
-  }, [fetchRequests, filters]);
+    fetchRequests(filters, requestPage);
+  }, [fetchRequests, filters, requestPage]);
 
   useEffect(() => {
-    fetchVisitors();
+    fetchVisitors(visitorPage);
     fetchAdmins();
-  }, [fetchVisitors, fetchAdmins]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visitorPage, fetchAdmins]);
 
-  // Re-fetches whenever filters change, debounced so typing in the search
-  // box doesn't fire a request per keystroke.
+  // Re-fetches whenever filters OR the page change, debounced so typing in
+  // the search box doesn't fire a request per keystroke. A filter change
+  // always jumps back to page 1 — staying on, say, page 4 of a narrower
+  // result set could silently show nothing.
   useEffect(() => {
     const handle = setTimeout(() => {
       setLoadingRequests(true);
-      fetchRequests(filters);
+      fetchRequests(filters, requestPage);
     }, 300);
     return () => clearTimeout(handle);
-  }, [filters, fetchRequests]);
+  }, [filters, requestPage, fetchRequests]);
+
+  const handleFiltersChange = (next) => {
+    setRequestPage(1);
+    setFilters(next);
+  };
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
@@ -162,99 +216,74 @@ const AdminDashboard = ({ admin }) => {
     }
   };
 
+  // Changes made in the drawer: show them everywhere immediately, then
+  // quietly refresh the list so counts (and the new-lead badge) catch up.
+  const handleLeadChanged = useCallback((patch) => {
+    setPatches((prev) => ({ ...prev, [patch.id]: { ...prev[patch.id], ...patch, __ts: Date.now() } }));
+    window.clearTimeout(refreshTimer.current);
+    refreshTimer.current = window.setTimeout(() => fetchRequests(filters, requestPage), 800);
+  }, [fetchRequests, filters, requestPage]);
+
+  useEffect(() => () => window.clearTimeout(refreshTimer.current), []);
+
+  const closeLead = useCallback(() => setOpenLead(null), []);
+  const heading = HEADINGS[tab] || HEADINGS.overview;
+
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex">
-      <Sidebar
-        tab={tab}
-        onTabChange={setTab}
-        collapsed={collapsed}
-        onToggleCollapsed={() => setCollapsed((c) => !c)}
-        newCount={requestData?.newCount || 0}
-      />
+    <div className="o2 ad">
+      <TopNav tab={tab} onTabChange={setTab} newCount={requestData?.newCount || 0} admin={admin} onLogout={handleLogout} />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="border-b border-[var(--border)] px-4 sm:px-6 py-4 flex items-center justify-between gap-3 flex-wrap">
-          <div className="min-w-0">
-            <h1 className="text-lg font-bold capitalize">{tab}</h1>
-            <p className="text-xs text-[var(--text-dim)] truncate">
-              Signed in as {admin?.name} ({admin?.email})
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <Bell size={18} className="text-[var(--text-dim)]" />
-              {requestData?.newCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#00AEEF] text-black text-[9px] font-bold rounded-full min-w-[15px] h-[15px] flex items-center justify-center px-0.5">
-                  {requestData.newCount}
-                </span>
-              )}
-            </div>
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle dark mode"
-              className="text-[var(--text-dim)] hover:text-[#00AEEF] transition-colors"
-            >
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 text-sm text-[var(--text-dim)] hover:text-[#00AEEF] transition-colors"
-            >
-              <LogOut size={15} /> Log out
-            </button>
-          </div>
-        </header>
+      <main className="ad-main">
+        <PageHead eyebrow={heading.eyebrow} title={heading.title(admin)} />
+        {loadError && <p role="alert" className="text-sm text-rose-300 mb-4">{loadError}</p>}
 
-        <div className="flex-1 px-4 sm:px-6 py-6 sm:py-8 pb-24 md:pb-8 overflow-y-auto overflow-x-hidden">
-          {loadError && <p className="text-sm text-red-400 mb-4">{loadError}</p>}
+        {tab === 'overview' && <OverviewPanel onOpenLead={setOpenLead} onGoTab={setTab} />}
 
-          {tab === 'requests' && (
-            <>
-              <AIInsights />
+        {tab === 'leads' && (
+          <LeadsPanel
+            requestData={requestData}
+            loadingRequests={loadingRequests}
+            admins={admins}
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            requestPage={requestPage}
+            onPageChange={setRequestPage}
+            requestPageSize={REQUEST_PAGE_SIZE}
+            onUpdateStatus={updateStatus}
+            onBulkUpdateStatus={bulkUpdateStatus}
+            onAssign={assignRequest}
+            onAddNote={addNote}
+            onOpenLead={setOpenLead}
+            onLeadsChanged={() => fetchRequests(filters, requestPage)}
+            patches={patches}
+          />
+        )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <MetricCard
-                  label="Total requests"
-                  value={requestData?.total ?? 0}
-                  daily={requestData?.dailyRequests}
-                  loading={loadingRequests}
-                />
-                <MetricCard
-                  label="New requests"
-                  value={requestData?.newCount ?? 0}
-                  loading={loadingRequests}
-                />
-                <MetricCard
-                  label="Last 14 days"
-                  value={requestData?.dailyRequests?.reduce((s, d) => s + d.count, 0) ?? 0}
-                  daily={requestData?.dailyRequests}
-                  loading={loadingRequests}
-                />
-              </div>
+        {tab === 'analytics' && (
+          <AnalyticsPanel
+            visitorData={visitorData}
+            loadingVisitors={loadingVisitors}
+            visitorPage={visitorPage}
+            onVisitorPageChange={setVisitorPage}
+          />
+        )}
 
-              <RequestsTable
-                requests={requestData?.requests}
-                loading={loadingRequests}
-                onUpdateStatus={updateStatus}
-                onBulkUpdateStatus={bulkUpdateStatus}
-                admins={admins}
-                onAssign={assignRequest}
-                onAddNote={addNote}
-                filters={filters}
-                onFiltersChange={setFilters}
-              />
-            </>
-          )}
+        {tab === 'site' && <SitePanel />}
+        {tab === 'system' && <SystemPanel />}
+        {tab === 'settings' && <SettingsPanel admin={admin} />}
+      </main>
 
-          {tab === 'visitors' && <VisitorsPanel visitorData={visitorData} loading={loadingVisitors} />}
-
-          {tab === 'content' && <ContentPanel />}
-
-          {tab === 'settings' && <SettingsPanel admin={admin} />}
-        </div>
-      </div>
-
-      <MobileTabBar tab={tab} onTabChange={setTab} newCount={requestData?.newCount || 0} />
+      {openLead && (
+        <LeadDrawer
+          key={openLead.id}
+          leadId={openLead.id}
+          initial={openLead}
+          admins={admins}
+          admin={admin}
+          onClose={closeLead}
+          onChanged={handleLeadChanged}
+        />
+      )}
     </div>
   );
 };

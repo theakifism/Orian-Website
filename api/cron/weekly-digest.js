@@ -1,10 +1,16 @@
 import { requireCron } from '../_lib/cron.js';
 import { requireSupabase } from '../_lib/supabase.js';
-import { daysAgoIso } from '../_lib/dates.js';
-import { sendWeeklyDigest } from '../_lib/email.js';
+import { daysAgoIso, businessDateKey } from '../_lib/dates.js';
+import { sendWeeklyDigest, sendFollowUpReminder } from '../_lib/email.js';
+import { collectFollowUps, OPEN_STATUSES } from '../_lib/leads.js';
+import { isMissingSchema } from '../_lib/schema-error.js';
+import { logAudit } from '../_lib/audit.js';
 
-// Scheduled in vercel.json to run once a week (Vercel's Hobby/free plan
-// caps cron invocations at once per day, so weekly comfortably fits).
+// Scheduled daily in vercel.json (still one cron job, so it fits Vercel's free
+// plan). Every day it emails the team a reminder if any lead needs a
+// follow-up. On Mondays it sends the weekly digest instead, which includes
+// the same follow-up list. (The file keeps its old name so the cron path in
+// vercel.json and any monitoring you set up stays valid.)
 export default requireCron(async (req, res) => {
   let supabase;
   try {
@@ -14,8 +20,42 @@ export default requireCron(async (req, res) => {
     return res.status(500).json({ error: 'Server is not configured.' });
   }
 
+  const dashboardUrl = `${process.env.SITE_URL || 'https://your-site.vercel.app'}/admin`;
+  const now = new Date();
+
+  // ---- leads that need attention ----
+  const cols = 'id, name, company, status, assigned_to, created_at, follow_up_at, last_activity_at';
+  let openRes = await supabase.from('requests').select(cols).in('status', OPEN_STATUSES).limit(500);
+  if (openRes.error && isMissingSchema(openRes.error)) {
+    openRes = await supabase.from('requests').select('id, name, company, status, assigned_to, created_at').in('status', OPEN_STATUSES).limit(500);
+  }
+  if (openRes.error) {
+    console.error('Failed to load open leads for reminders:', openRes.error.message);
+    return res.status(500).json({ error: 'Could not load leads.' });
+  }
+  const followUps = collectFollowUps(openRes.data || [], now).map((f) => ({
+    ...f,
+    stage: f.stage,
+  }));
+
+  const isMonday = new Date(`${businessDateKey(now.toISOString())}T00:00:00Z`).getUTCDay() === 1;
+
+  // ---- not Monday: a short reminder, only when there is something to do ----
+  if (!isMonday) {
+    if (followUps.length === 0) {
+      await logAudit(supabase, null, 'system.daily-run', { detail: 'No follow-ups due, no email sent' });
+      return res.status(200).json({ ok: true, sent: false, followUps: 0 });
+    }
+    const result = await sendFollowUpReminder({ items: followUps, dashboardUrl });
+    await logAudit(supabase, null, 'system.daily-run', {
+      detail: result.ok ? `Reminder sent for ${followUps.length} lead(s)` : `Reminder not sent (${result.reason})`,
+    });
+    return res.status(200).json({ ok: result.ok, sent: result.ok, reason: result.reason, followUps: followUps.length });
+  }
+
+  // ---- Monday: weekly digest ----
   const since = daysAgoIso(7);
-  const rangeLabel = `${new Date(since).toLocaleDateString()} – ${new Date().toLocaleDateString()}`;
+  const rangeLabel = `${new Date(since).toLocaleDateString()} – ${now.toLocaleDateString()}`;
 
   const [leadsRes, statusRes, visitsRes, uniqueVisitorsRes] = await Promise.all([
     supabase.from('requests').select('id', { count: 'exact', head: true }).gte('created_at', since),
@@ -54,10 +94,14 @@ export default requireCron(async (req, res) => {
     totalVisits: (visitsRes.data || []).length,
     uniqueVisitors,
     topPages,
-    dashboardUrl: `${process.env.SITE_URL || 'https://your-site.vercel.app'}/admin`,
+    followUps,
+    dashboardUrl,
   };
 
   const result = await sendWeeklyDigest(stats);
+  await logAudit(supabase, null, 'system.daily-run', {
+    detail: result.ok ? 'Weekly digest sent' : `Weekly digest not sent (${result.reason})`,
+  });
   if (!result.ok) {
     console.error('Weekly digest email failed:', result.reason);
     return res.status(200).json({ ok: false, reason: result.reason, stats });

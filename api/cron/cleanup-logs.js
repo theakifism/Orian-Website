@@ -26,6 +26,11 @@ export default requireCron(async (req, res) => {
     return res.status(500).json({ error: 'Cleanup failed.' });
   }
 
+  // Activity log + rejected-submission log (180 days). Tolerates the migration
+  // not having been run yet - that must never fail the visit/login cleanup above.
+  const opsResult = await supabase.rpc('purge_old_ops_logs', { retention_days: 180 });
+  if (opsResult.error) console.error('Ops log cleanup skipped:', opsResult.error.message);
+
   console.log(
     `Log cleanup: purged ${visitsResult.data} visit row(s) and ${loginEventsResult.data} login_events row(s) older than ${RETENTION_DAYS} days.`
   );
@@ -33,6 +38,7 @@ export default requireCron(async (req, res) => {
     ok: true,
     deletedVisits: visitsResult.data,
     deletedLoginEvents: loginEventsResult.data,
+    deletedOpsLogs: opsResult.error ? null : opsResult.data,
     retentionDays: RETENTION_DAYS,
   });
 });

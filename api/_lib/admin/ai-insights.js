@@ -1,11 +1,7 @@
-import { GoogleGenAI } from '@google/genai';
-import { generateContentWithRetry, isGeminiOverloaded } from '../gemini.js';
+import { createGroqCompletion } from '../groq.js';
 import { requireAdmin } from '../auth.js';
 import { requireSupabase } from '../supabase.js';
 import { daysAgoIso } from '../dates.js';
-
-const apiKey = process.env.GEMINI_API_KEY || '';
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 const SYSTEM_INSTRUCTION = `
 You are an analytics assistant summarizing internal business data for the Orian Teleservices
@@ -27,7 +23,7 @@ Suggested actions:
 `.trim();
 
 // This endpoint is on-demand (button click), not polled automatically, to
-// keep Gemini API usage inside the free tier — insights are cheap to
+// keep Groq API usage inside the free tier — insights are cheap to
 // generate but there's no reason to burn quota on data nobody is viewing.
 export default requireAdmin(async (req, res) => {
   if (req.method !== 'POST') {
@@ -35,8 +31,8 @@ export default requireAdmin(async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (!ai) {
-    return res.status(500).json({ error: 'AI insights are not configured (GEMINI_API_KEY missing).' });
+  if (!process.env.GROQ_API_KEY) {
+    return res.status(500).json({ error: 'AI insights are not configured (GROQ_API_KEY missing).' });
   }
 
   let supabase;
@@ -83,18 +79,20 @@ export default requireAdmin(async (req, res) => {
   };
 
   try {
-    const response = await generateContentWithRetry(ai, {
-      model: 'gemini-3.6-flash',
-      contents: [{ role: 'user', parts: [{ text: JSON.stringify(stats) }] }],
-      config: { systemInstruction: SYSTEM_INSTRUCTION },
+    const response = await createGroqCompletion({
+      messages: [
+        { role: 'system', content: SYSTEM_INSTRUCTION },
+        { role: 'user', content: JSON.stringify(stats) },
+      ],
+      maxTokens: 700,
     });
-
-    const text = response.text ?? 'Not enough data yet to generate insights.';
+    const result = await response.json();
+    const text = result?.choices?.[0]?.message?.content || 'Not enough data yet to generate insights.';
     return res.status(200).json({ text, generatedAt: new Date().toISOString(), stats });
   } catch (err) {
-    console.error('Gemini insights error:', err);
-    if (isGeminiOverloaded(err)) {
-      return res.status(503).json({ error: 'Gemini is getting a lot of requests right now — please try again in a moment.' });
+    console.error('Groq insights error:', err);
+    if ([429, 500, 502, 503, 504].includes(err.status)) {
+      return res.status(503).json({ error: 'Groq is busy right now — please try again in a moment.' });
     }
     return res.status(500).json({ error: 'Failed to generate insights. Please try again shortly.' });
   }

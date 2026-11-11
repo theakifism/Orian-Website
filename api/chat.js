@@ -1,21 +1,13 @@
-import { GoogleGenAI } from '@google/genai';
-import { generateContentStreamWithRetry, isGeminiOverloaded } from './_lib/gemini.js';
-import { verifyTurnstile } from './_lib/turnstile.js';
+import { createGroqCompletion, readGroqStream } from './_lib/groq.js';
 import { getClientIp } from './_lib/ip.js';
 import { supabase } from './_lib/supabase.js';
 import { findBlock } from './_lib/blocklist.js';
 
-// Loose per-IP throttle on top of Turnstile. This endpoint calls a paid,
-// metered Gemini API, so unlike the visit-tracking beacon it needs a real
-// cost backstop, not just spam filtering. 30 messages / 10 minutes is well
-// above anything a real visitor chatting with the assistant would hit, but
-// stops a script from hammering the endpoint to run up API usage.
+// Per-IP throttling protects the metered AI endpoint without making a CAPTCHA
+// challenge a prerequisite for normal chat use.
 const MAX_ATTEMPTS_PER_IP = 30;
 const WINDOW_SECONDS = 10 * 60;
-
-// Initialize SDK safely by checking process.env
-const apiKey = process.env.GEMINI_API_KEY || '';
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+const localAttemptsByIp = new Map();
 
 const SYSTEM_INSTRUCTION = `
 You are Orian AI, the chat assistant on the Orian Teleservices website. You talk like a friendly, knowledgeable person from the Orian team, not like a brochure or a robot.
@@ -40,6 +32,8 @@ Services:
 - WhatsApp Business API: verified green tick, chatbots, broadcast messages and webhooks, with hand-off to a live agent. Orian handles the Meta paperwork, but the review time is set by Meta and varies.
 - Also available: social media handling and IT solutions (cloud hosting, networks, security, helpdesk).
 
+Reported service metrics: the website shows 99.95% platform uptime and 99.95% message delivery rate. Describe these as reported metrics, not a contractual SLA; account-specific commitments are defined in the applicable service agreement.
+
 Getting started: a sandbox API key can be issued within minutes of sign-up, and most new clients reach their first live send in under 48 hours because the DLT filing starts the same day the documents arrive. Sandbox access can be requested on the Developers page. A named onboarding engineer helps with the first campaign.
 
 Support: the support desk is available 24/7 by phone, email and WhatsApp.
@@ -58,10 +52,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Handle missing API key cleanly before attempting request
-  if (!ai) {
-    console.error('Gemini API Error: GEMINI_API_KEY is missing from environment variables.');
-    return res.status(500).json({ error: 'Server authentication configuration missing.' });
+  if (!process.env.GROQ_API_KEY) {
+    console.error('Groq API Error: GROQ_API_KEY is missing from environment variables.');
+    return res.status(500).json({ error: 'The AI assistant is not configured yet.' });
   }
 
   const clientIp = getClientIp(req);
@@ -71,20 +64,27 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many requests. Please try again later.' });
   }
 
-  // Same Turnstile check as the contact form: fails open only when
-  // TURNSTILE_SECRET_KEY isn't set at all, fails closed on an actually bad
-  // or missing token once it IS configured. See api/_lib/turnstile.js.
-  const turnstileResult = await verifyTurnstile((req.body || {}).turnstileToken, clientIp);
-  if (!turnstileResult.ok) {
-    return res.status(400).json({ error: 'Verification failed. Please refresh and try again.' });
+  // Chat uses layered per-IP rate limits instead of CAPTCHA, avoiding
+  // verification failures before a question reaches the AI.
+
+  // Local backstop works when Supabase is not configured; its shared limit
+  // below covers all instances whenever the database is available.
+  if (clientIp) {
+    const now = Date.now();
+    const record = localAttemptsByIp.get(clientIp);
+    if (record && record.resetAt > now && record.count >= MAX_ATTEMPTS_PER_IP) {
+      return res.status(429).json({ error: 'Too many messages. Please wait a few minutes and try again.' });
+    }
+    localAttemptsByIp.set(clientIp, record && record.resetAt > now
+      ? { count: record.count + 1, resetAt: record.resetAt }
+      : { count: 1, resetAt: now + WINDOW_SECONDS * 1000 });
+    if (localAttemptsByIp.size > 5000) {
+      for (const [ip, item] of localAttemptsByIp) {
+        if (item.resetAt <= now) localAttemptsByIp.delete(ip);
+      }
+    }
   }
 
-  // Per-IP throttle, backed by the same Postgres rate limiter the login
-  // endpoint uses (shared across Vercel's ephemeral function instances,
-  // unlike an in-memory counter). This is a secondary cost control on top
-  // of Turnstile, not a security boundary — if Supabase isn't configured
-  // or the check itself errors, we deliberately fail OPEN here rather than
-  // breaking the chat widget over a non-critical guard rail.
   if (supabase && clientIp) {
     try {
       const { data: allowed, error: rateLimitError } = await supabase.rpc('check_rate_limit', {
@@ -125,62 +125,27 @@ export default async function handler(req, res) {
     const MAX_HISTORY_TURNS = 8;
     const MAX_HISTORY_MESSAGE_LENGTH = 1000;
 
-    // Convert frontend history to SDK contents format
+    // Convert the conversation into OpenAI-compatible chat messages.
     const contents = history
       .filter((m) => m && typeof m.text === 'string' && m.text.length <= MAX_HISTORY_MESSAGE_LENGTH)
       .slice(-MAX_HISTORY_TURNS)
       .map((m) => ({
-        role: m.sender === 'user' ? 'user' : 'model',
-        parts: [{ text: m.text }],
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text,
       }));
 
-    // Ensure contents sequence strictly starts with a user turn if history exists
-    while (contents.length > 0 && contents[0].role !== 'user') {
-      contents.shift();
-    }
+    while (contents.length > 0 && contents[0].role !== 'user') contents.shift();
+    const messages = [
+      { role: 'system', content: SYSTEM_INSTRUCTION },
+      ...contents,
+      { role: 'user', content: message.trim() },
+    ];
 
-    // Append current user message
-    contents.push({ role: 'user', parts: [{ text: message.trim() }] });
-
-    // Primary model first; if Gemini says 429/503 (quota or overloaded) after retries,
-    // try a fallback model before giving up. Models are configurable from Vercel env vars.
-    const PRIMARY_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
-    const FALLBACK_MODEL = process.env.GEMINI_FALLBACK_MODEL || 'gemini-3.6-flash';
-
-    const baseConfig = { systemInstruction: SYSTEM_INSTRUCTION, maxOutputTokens: 500 };
-    let stream;
-    try {
-      stream = await generateContentStreamWithRetry(
-        ai,
-        {
-          model: PRIMARY_MODEL,
-          contents,
-          // Optional: set GEMINI_THINKING_LEVEL (e.g. 'low') in Vercel to speed up replies.
-          // Left unset by default because not every model supports every level.
-          config: process.env.GEMINI_THINKING_LEVEL
-            ? { ...baseConfig, thinkingConfig: { thinkingLevel: process.env.GEMINI_THINKING_LEVEL } }
-            : baseConfig,
-        },
-        { retries: 1 },
-      );
-    } catch (primaryErr) {
-      console.error(`Gemini primary model (${PRIMARY_MODEL}) failed:`, primaryErr?.status, primaryErr?.message);
-      if (!(isGeminiOverloaded(primaryErr) || primaryErr?.status === 404 || primaryErr?.status === 400) || !FALLBACK_MODEL || FALLBACK_MODEL === PRIMARY_MODEL) throw primaryErr;
-      try {
-        stream = await generateContentStreamWithRetry(
-          ai,
-          { model: FALLBACK_MODEL, contents, config: baseConfig },
-          { retries: 1 },
-        );
-      } catch (fallbackErr) {
-        console.error(`Gemini fallback model (${FALLBACK_MODEL}) failed:`, fallbackErr?.status, fallbackErr?.message);
-        throw primaryErr;
-      }
-    }
+    const stream = await createGroqCompletion({ messages, stream: true, maxTokens: 500 });
 
     // The response is a plain streamed text body, not JSON — the client
     // shows it live as it arrives. The 200 header is only sent once the
-    // first real text arrives, so if Gemini fails before that point the
+    // first real text arrives, so if Groq fails before that point the
     // catch block below can still return a proper error instead of an
     // empty reply.
     const sendHeaders = () =>
@@ -191,9 +156,7 @@ export default async function handler(req, res) {
       });
 
     let started = false;
-    for await (const chunk of stream) {
-      const piece = chunk.text;
-      if (!piece) continue;
+    for await (const piece of readGroqStream(stream)) {
       if (!started) {
         sendHeaders();
         started = true;
@@ -208,15 +171,15 @@ export default async function handler(req, res) {
 
     return res.end();
   } catch (error) {
-    console.error('Gemini API Error:', error);
+    console.error('Groq API Error:', error);
 
     // If we've already started streaming, headers are locked in — the best
     // we can do is end the stream. Otherwise return a proper error.
     if (res.headersSent) {
       return res.end();
     }
-    if (isGeminiOverloaded(error)) {
-      return res.status(503).json({ error: "Orian AI is getting a lot of requests right now — please try again in a moment." });
+    if ([429, 500, 502, 503, 504].includes(error.status)) {
+      return res.status(503).json({ error: "Orian AI is busy right now — please try again in a moment." });
     }
     return res.status(500).json({ error: 'Failed to generate a response. Please try again shortly.' });
   }
