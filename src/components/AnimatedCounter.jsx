@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 const AnimatedCounter = ({ end, duration = 2000, suffix = '', decimals = 0 }) => {
   const [count, setCount] = useState(0);
@@ -15,7 +15,6 @@ const AnimatedCounter = ({ end, duration = 2000, suffix = '', decimals = 0 }) =>
           const animate = (timestamp) => {
             if (!startTime) startTime = timestamp;
             const progress = Math.min((timestamp - startTime) / duration, 1);
-            const easeOutQuad = 1 - Math.pow(1 - progress, 3);
             setCount(progress * end);
 
             if (progress < 1) {

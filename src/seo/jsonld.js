@@ -5,9 +5,6 @@ import { SITE_URL, SITE_NAME, CONTACT, OFFICE_HOURS, buildUrl, socialProfileUrls
  * this for the knowledge-panel style info (logo, name, contact) and to
  * disambiguate the brand in results.
  */
-const ALL_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-// The helpline is available 24/7.
 const supportContactPoints = (contact) =>
   contact.phones.map((phone) => ({
     '@type': 'ContactPoint',
@@ -15,7 +12,6 @@ const supportContactPoints = (contact) =>
     contactType: 'customer service',
     areaServed: 'IN',
     availableLanguage: ['English', 'Hindi'],
-    hoursAvailable: { '@type': 'OpeningHoursSpecification', dayOfWeek: ALL_WEEK, opens: '00:00', closes: '23:59' },
   }));
 
 export const organizationSchema = (contact = CONTACT) => ({
@@ -23,7 +19,7 @@ export const organizationSchema = (contact = CONTACT) => ({
   '@type': 'Organization',
   '@id': `${SITE_URL}/#organization`,
   name: SITE_NAME,
-  alternateName: ['Orian', 'Orian Teleservices Bulk SMS'],
+  alternateName: ['Orian Teleservices', 'Orian'],
   url: SITE_URL,
   logo: `${SITE_URL}/logo-full.png`,
   description:
@@ -110,7 +106,7 @@ export const websiteSchema = () => ({
   '@id': `${SITE_URL}/#website`,
   url: SITE_URL,
   name: SITE_NAME,
-  alternateName: 'Orian',
+  alternateName: 'Orian Teleservices',
   inLanguage: 'en-IN',
   publisher: { '@id': `${SITE_URL}/#organization` },
 });

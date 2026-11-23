@@ -27,6 +27,10 @@ const siteVerification = () => ({
 export default defineConfig({
   plugins: [react(), tailwindcss(), photos(), siteVerification()],
   build: {
+    // Keep the JavaScript bundle compatible with Safari 14 as well as the CSS
+    // (see cssTarget below). Vite 8's default baseline starts at Safari 16.4,
+    // which can leave older Mac Safari unable to execute lazy-loaded page chunks.
+    target: 'safari14',
     // No source maps in production, so visitors cannot open your original source files.
     sourcemap: false,
     // Emit classic (min-width: 960px) media queries. The default output uses the newer range syntax

@@ -1,7 +1,6 @@
-import React from 'react';
 import SectionHead from './SectionHead';
 import { useLang } from '../../context/LangContext';
-import { photo, photoProps } from '../../utils/photo';
+import { photoProps } from '../../utils/photo';
 
 /**
  * Photo section: the team and the support desk. Alt text describes what is in

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { requirementTypes as defaultRequirementTypes } from '../content/defaults/SpecialRequirement.js';
 import { useData } from '../content';
 import { track } from '../utils/analytics';
@@ -9,7 +9,7 @@ const initialForm = {
   contact: '',
   company: '',
   location: '',
-  requirementType: defaultRequirementTypes[0],
+  requirementType: 'General Enquiry',
   message: '',
   consent: false,
 };
@@ -29,12 +29,13 @@ const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
  * Restyled for the new design: no confetti, no glow, no watermark behind the
  * fields; the success state is a plain confirmation.
  */
-const SpecialRequirement = ({ embedded = false, initialRequirementType = defaultRequirementTypes[0], initialMessage = '', submitLabel = 'Submit request', source = 'contact' }) => {
+const SpecialRequirement = ({ embedded = false, initialRequirementType = 'General Enquiry', initialMessage = '', submitLabel = 'Submit request', source = 'contact', formEyebrow = '', formTitle = '', formDescription = '' }) => {
   const configuredTypes = useData('SpecialRequirement.requirementTypes', defaultRequirementTypes);
   const requirementTypes = configuredTypes.includes(initialRequirementType)
     ? configuredTypes
     : [initialRequirementType, ...configuredTypes];
   const [form, setForm] = useState(() => ({ ...initialForm, requirementType: initialRequirementType, message: initialMessage }));
+  const [submittedForm, setSubmittedForm] = useState(null);
   // If the admin removed/renamed the option that was selected, fall back to the first one
   // so the dropdown and the submitted value never disagree.
   const requirementType = requirementTypes.includes(form.requirementType) ? form.requirementType : (requirementTypes[0] || '');
@@ -136,8 +137,8 @@ const SpecialRequirement = ({ embedded = false, initialRequirementType = default
       }
 
       setStatus('success');
+      setSubmittedForm({ ...form, requirementType });
       track('lead_form_submitted', { source, requirementType });
-      setForm({ ...initialForm, requirementType: initialRequirementType, message: initialMessage });
       resetTurnstile();
     } catch (err) {
       console.error('Special requirement submission failed:', err);
@@ -153,17 +154,40 @@ const SpecialRequirement = ({ embedded = false, initialRequirementType = default
     onChange: handleChange,
     ...(errors[name] ? { 'aria-invalid': true, 'aria-describedby': `sr-${name}-err` } : {}),
   });
-  const Err = ({ name }) => (errors[name] ? <p className="o2-err" id={`sr-${name}-err`}>{errors[name]}</p> : null);
+  const renderErr = (name) => (errors[name] ? <p className="o2-err" id={`sr-${name}-err`}>{errors[name]}</p> : null);
 
   const card = (
     <div className="o2-form-card o2-reqform" data-section="special-requirement">
+      {formTitle && (
+        <div className="o2-form-intro">
+          {formEyebrow && <span className="o2-t-kicker is-primary">{formEyebrow}</span>}
+          <h3>{formTitle}</h3>
+          {formDescription && <p>{formDescription}</p>}
+        </div>
+      )}
       {status === 'success' ? (
         <div className="o2-ready" role="status">
           <span className="o2-tag solid">Sent</span>
           <h3>Request received.</h3>
-          <p>Thanks for reaching out. Our team will review your requirement and get back to you shortly.</p>
+          <p>Thanks, {submittedForm?.name || 'we have your request'}. Here is what you sent:</p>
+          {submittedForm && (
+            <dl className="o2-request-summary">
+              <div><dt>Request type</dt><dd>{submittedForm.requirementType}</dd></div>
+              {submittedForm.company && <div><dt>Company</dt><dd>{submittedForm.company}</dd></div>}
+              <div><dt>Email</dt><dd>{submittedForm.email}</dd></div>
+              {submittedForm.contact && <div><dt>Contact number</dt><dd>{submittedForm.contact}</dd></div>}
+              {submittedForm.location && <div><dt>Location</dt><dd>{submittedForm.location}</dd></div>}
+              <div className="is-message"><dt>Requirement</dt><dd>{submittedForm.message}</dd></div>
+            </dl>
+          )}
+          <p>Our team will review your request and follow up using the contact details you provided.</p>
           <div className="acts">
-            <button type="button" className="o2-btn o2-btn-ghost" onClick={() => setStatus('idle')}>Send another request</button>
+            <button type="button" className="o2-btn o2-btn-ghost" onClick={() => {
+              setForm({ ...initialForm, requirementType: initialRequirementType, message: initialMessage });
+              setSubmittedForm(null);
+              setErrors({});
+              setStatus('idle');
+            }}>Send another request</button>
           </div>
         </div>
       ) : (
@@ -172,7 +196,7 @@ const SpecialRequirement = ({ embedded = false, initialRequirementType = default
             <div className="o2-field">
               <label htmlFor="sr-name">Full name</label>
               <input {...fieldProps('name')} type="text" autoComplete="name" />
-              <Err name="name" />
+              {renderErr('name')}
             </div>
             <div className="o2-field">
               <label htmlFor="sr-company">Company (optional)</label>
@@ -181,12 +205,12 @@ const SpecialRequirement = ({ embedded = false, initialRequirementType = default
             <div className="o2-field">
               <label htmlFor="sr-email">Email</label>
               <input {...fieldProps('email')} type="email" autoComplete="email" placeholder="you@company.com" />
-              <Err name="email" />
+              {renderErr('email')}
             </div>
             <div className="o2-field">
               <label htmlFor="sr-contact">Contact number</label>
               <input {...fieldProps('contact')} type="tel" autoComplete="tel" placeholder="+91 00000 00000" />
-              <Err name="contact" />
+              {renderErr('contact')}
             </div>
             <div className="o2-field">
               <label htmlFor="sr-location">Location</label>
@@ -201,7 +225,7 @@ const SpecialRequirement = ({ embedded = false, initialRequirementType = default
             <div className="o2-field full">
               <label htmlFor="sr-message">Tell us about your requirement</label>
               <textarea {...fieldProps('message')} rows={4} placeholder="Volume, timelines, integrations, or anything else our team should know." />
-              <Err name="message" />
+              {renderErr('message')}
             </div>
           </div>
 

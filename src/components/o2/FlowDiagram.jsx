@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useDepthTier from '../../hooks/useDepthTier';
 import SectionHead from './SectionHead';
 import { useLang } from '../../context/LangContext';
@@ -8,8 +8,8 @@ const STEPS = [
   { title: 'DLT check', body: 'The sender ID and template are checked against your registered headers and templates.', log: 'template matched', res: 'ok' },
   { title: 'Route selection', body: 'A route is chosen for the message type, with a fallback ready if it degrades.', log: 'route selected', res: 'primary' },
   { title: 'Operator', body: 'The message is handed to the operator network for delivery.', log: 'submitted to operator', res: 'ok' },
-  { title: 'Handset', body: 'The operator delivers the message to the phone.', log: 'handset reached', res: 'ok' },
-  { title: 'Delivery report', body: 'The status comes back and is stored against that message.', log: 'delivery report stored', res: 'delivered' },
+  { title: 'Recipient network', body: 'The operator attempts delivery; the result can depend on network and handset availability.', log: 'delivery attempt', res: 'pending' },
+  { title: 'Delivery status', body: 'Review the status returned for the message. It does not confirm that a person read it.', log: 'status returned', res: 'reported' },
 ];
 
 /**
@@ -35,7 +35,7 @@ const FlowDiagram = () => {
   useEffect(() => {
     const el = root.current;
     if (!el) return undefined;
-    if (mode !== 'scroll') { setActive(STEPS.length - 1); el.style.setProperty('--fp', 1); return undefined; }
+    if (mode !== 'scroll') { el.style.setProperty('--fp', 1); return undefined; }
 
     let raf = 0;
     let last = -1;
@@ -65,7 +65,7 @@ const FlowDiagram = () => {
               <ol className="o2-flow-steps">
                 <span className="o2-flow-line" aria-hidden="true" />
                 {STEPS.map((s, i) => (
-                  <li key={s.title} className={i < active ? 'is-done' : i === active ? 'is-active' : ''}>
+                  <li key={s.title} className={mode === 'scroll' ? (i < active ? 'is-done' : i === active ? 'is-active' : '') : ''}>
                     <h3>{s.title}</h3>
                     <p>{s.body}</p>
                   </li>
@@ -76,7 +76,7 @@ const FlowDiagram = () => {
             <div className="o2-log" aria-hidden="true">
               <div className="o2-log-head"><span>Message journey</span></div>
               <div className="o2-log-body">
-                {STEPS.slice(0, active + 1).map((s, i) => (
+                {STEPS.slice(0, mode === 'scroll' ? active + 1 : STEPS.length).map((s, i) => (
                   <div key={s.title} className={`o2-log-line${i === active ? ' is-last' : ''}`}>
                     <b>{i + 1}</b>
                     <span>{s.log}</span>

@@ -9,27 +9,27 @@ export const whyUsCountWord = NUMBER_WORDS[whyUsData.length] || String(whyUsData
 export const pageMeta = {
   home: {
     path: '/',
-    title: 'Orian Teleservices | Bulk SMS Provider & API Gateway',
+    title: 'Orian Teleservices | Bulk SMS Service Provider in India',
     description:
-      "Explore bulk SMS and OTP services from Orian Teleservices, with direct operator routes, API integration, 24/7 support and delivery reports for every message.",
+      'Find Orian Teleservices for bulk SMS in India: OTP, transactional alerts and campaigns, with API integration, delivery reports, voice and DLT guidance.',
   },
   about: {
     path: '/about',
     title: 'About Orian Teleservices | A Bulk SMS API Provider',
     description:
-      'Learn about Orian Teleservices and its business messaging services, direct operator routes, API integration and 24/7 support.',
+      'Learn about Orian Teleservices and its business communication services, including bulk SMS, OTP messaging, voice, WhatsApp Business API and DLT help.',
   },
   services: {
     path: '/services',
-    title: 'Bulk SMS, Voice, DLT, WhatsApp, Marketing & IT | Orian',
+    title: 'Messaging, Email & Digital Services | Orian Teleservices',
     description:
-      "Explore Orian's bulk SMS, voice, DLT assistance, WhatsApp Business API, digital marketing and IT services. Ask our team which options fit your requirements.",
+      "Explore Orian's SMS, voice, WhatsApp, RCS and email services, along with digital solutions and IT support for businesses.",
   },
   industries: {
     path: '/industries',
     title: 'Industries We Serve with Bulk SMS & Voice API | Orian',
     description:
-      "See how banks, hospitals, retailers and other industries use Orian's bulk SMS, voice API and WhatsApp API to reach customers reliably at scale.",
+      "Explore messaging use cases for banking, healthcare, retail, education and other sectors, then discuss your organization's requirements with Orian.",
   },
   whyUs: {
     path: '/why-us',
@@ -39,15 +39,15 @@ export const pageMeta = {
   },
   careers: {
     path: '/careers',
-    title: 'Careers at Orian Teleservices | Join Our Team Today',
+    title: 'Careers at Orian Teleservices | Open Applications',
     description:
-      "Join Orian Teleservices and help build the next carrier messaging backbone. We're scouting telecom routing, cloud and AI engineering talent for what's next.",
+      'No roles are currently listed. Learn about teams at Orian Teleservices and how to send an open application for future business communication roles.',
   },
   contact: {
     path: '/contact',
     title: 'Contact Orian Teleservices, Your Bulk SMS Provider',
     description:
-      'Contact Orian Teleservices 24/7 by phone, email or WhatsApp, or visit the Nagpur office for messaging and communication services.',
+      'Find Orian Teleservices phone, email and office details in Nagpur. Contact the team about bulk SMS, voice, WhatsApp Business API or DLT assistance.',
   },
   assistant: {
     path: '/assistant',
@@ -71,7 +71,7 @@ export const pageMeta = {
     path: '/help-center',
     title: 'Help Center | Orian Teleservices Support',
     description:
-      'Find answers on bulk SMS, voice API, WhatsApp Business API, DLT compliance and billing — or reach the Orian support team directly.',
+      'Browse answers about bulk SMS, voice API, WhatsApp Business API and DLT registration, or contact Orian Teleservices with a service question.',
   },
   useCases: {
     path: '/use-cases',
@@ -90,8 +90,8 @@ export const pageMeta = {
   },
   status: {
     path: '/status',
-    title: 'Platform Metrics | Orian Teleservices',
-    description: 'View Orian Teleservices reported uptime and message delivery metrics, and contact the support team about a service issue.',
+    title: 'Service Information | Orian Teleservices',
+    description: 'Learn what Orian message delivery reports can tell you, what can affect delivery, and how to contact support with a service question.',
   },
   resources: {
     path: '/resources',
@@ -107,35 +107,46 @@ export const pageMeta = {
 // ServiceDetailPage.jsx for any future service slug added to data/services.js
 // that isn't listed here yet.
 export const serviceMeta = {
+  'email-services': {
+    title: 'Email Services for Businesses | Orian Teleservices',
+    description: 'Discuss business email campaigns, audience preparation, message design and reporting options with Orian Teleservices for your business.',
+  },
+  'digital-solutions': {
+    title: 'Digital & IT Solutions for Businesses | Orian Teleservices',
+    description: 'Explore websites, workflow improvements, integrations, hosting, network security and helpdesk support with Orian Teleservices.',
+  },
+  'rcs-business-messaging': {
+    title: 'RCS Business Messaging | Orian Teleservices',
+    description: 'Explore rich, branded RCS business messaging and discuss content, network availability and integration needs with Orian.',
+  },
+  'transaction-email': {
+    title: 'Transaction Email Services | Orian Teleservices',
+    description: 'Discuss automated transaction emails for receipts and account updates, including event triggers and application integration.',
+  },
   'social-media-handling': {
     title: 'Social Media Handling Services | Orian Teleservices',
     description:
-      'Content planning, scheduling and community replies for your business pages, handled by one team alongside your SMS and WhatsApp messaging.',
+      'Learn about Orian social media handling for business pages, including content support and community management. Discuss channels and scope with the team.',
   },
   'bulk-sms-otp-gateways': {
-    title: 'Bulk SMS and OTP Messaging | Orian Teleservices',
+    title: 'Bulk SMS API for OTP, Alerts & Campaigns | Orian',
     description:
-      'Orian bulk SMS and OTP services include API integration, direct operator routes, 24/7 support and delivery reports for every message.',
+      'Send OTP, transactional and promotional bulk SMS with Orian. Explore SMS API integration, delivery reports and setup support for businesses in India.',
   },
   'voice-sms-ivr': {
     title: 'Voice API, IVR & Voice Broadcasting | Orian Teleservices',
     description:
-      "Orian's voice API powers automated voice broadcasting, OBD and interactive voice response at carrier scale, with call logs for every leg.",
+      'Explore Orian voice broadcasting, outbound voice calls and IVR options for business communication. Discuss routing, integration and reporting needs.',
   },
   'dlt-compliance': {
     title: 'DLT Registration & TRAI Compliance | Orian Teleservices',
     description:
-      'Get TRAI DLT registration handled end-to-end by Orian — entity, header and template filing so your bulk SMS campaigns launch fully compliant, fast.',
+      'Understand DLT registration for business SMS, including principal entities, sender headers and message templates, and discuss application support with Orian.',
   },
   'whatsapp-business-api': {
     title: 'WhatsApp Business API Provider | Orian Teleservices',
     description:
-      'Launch on the WhatsApp API with Orian: verified business setup, approved templates, chatbot flows and two-way conversations synced to your CRM.',
-  },
-  'it-solutions': {
-    title: 'Managed IT Solutions & Infrastructure | Orian Teleservices',
-    description:
-      'Discuss managed IT solutions from Orian, including cloud hosting, network setup, security services and helpdesk support for your business.',
+      'Explore WhatsApp Business API messaging, templates and integration options for customer conversations. Contact Orian to discuss onboarding requirements.',
   },
 };
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { KeyRound, Users, Lock, ShieldCheck } from 'lucide-react';
+import { readJsonResponse } from '../utils/http';
 
 const formatDate = (iso) => (iso ? new Date(iso).toLocaleString() : 'Never');
 
@@ -17,7 +18,7 @@ const TeamSection = ({ admin }) => {
     fetch('/api/admin/team-manage', { credentials: 'same-origin' })
       .then((res) => {
         if (!res.ok) throw new Error('load failed');
-        return res.json();
+        return readJsonResponse(res);
       })
       .then((data) => {
         setTeam(data.admins || []);
@@ -162,7 +163,7 @@ const SettingsPanel = ({ admin }) => {
         credentials: 'same-origin',
         body: JSON.stringify({ currentPassword: form.currentPassword, newPassword: form.newPassword }),
       });
-      const data = await res.json();
+      const data = await readJsonResponse(res);
       if (!res.ok) throw new Error(data.error || 'Could not change your password.');
       setStatus('success');
       setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -188,43 +189,49 @@ const SettingsPanel = ({ admin }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1.5">
+            <label htmlFor="admin-current-password" className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1.5">
               Current password
             </label>
             <input
               type="password"
+              id="admin-current-password"
               name="currentPassword"
               value={form.currentPassword}
               onChange={handleChange}
               required
+              autoComplete="current-password"
               className={inputClasses}
             />
           </div>
           <div>
-            <label className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1.5">
+            <label htmlFor="admin-new-password" className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1.5">
               New password
             </label>
             <input
               type="password"
+              id="admin-new-password"
               name="newPassword"
               value={form.newPassword}
               onChange={handleChange}
               minLength={10}
               required
+              autoComplete="new-password"
               className={inputClasses}
             />
           </div>
           <div>
-            <label className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1.5">
+            <label htmlFor="admin-confirm-password" className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1.5">
               Confirm new password
             </label>
             <input
               type="password"
+              id="admin-confirm-password"
               name="confirmPassword"
               value={form.confirmPassword}
               onChange={handleChange}
               minLength={10}
               required
+              autoComplete="new-password"
               className={inputClasses}
             />
           </div>

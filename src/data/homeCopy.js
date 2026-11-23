@@ -1,15 +1,8 @@
 // Homepage SEO copy. Edit wording here; the components in
 // src/components/o2/HomeSeoSections.jsx only render it.
 //
-// Reported uptime and delivery-rate figures are shared by every page that shows them.
-
-export const PLATFORM_UPTIME = '99.95';
-export const PLATFORM_DELIVERY_RATE = '99.95';
-
-export const HOME_METRICS = [
-  { value: `${PLATFORM_UPTIME}%`, label: 'platform uptime' },
-  { value: `${PLATFORM_DELIVERY_RATE}%`, label: 'message delivery rate' },
-];
+// Avoid publishing performance figures until they are backed by a defined,
+// current measurement period and verifiable production telemetry.
 
 export const homeFeatures = {
   eyebrow: 'Platform',
@@ -22,11 +15,11 @@ export const homeFeatures = {
     },
     {
       h: 'Integration planning',
-      p: 'Connect through the messaging API or dashboard, then test with a sandbox key issued within minutes of signup.',
+      p: 'Discuss messaging API or dashboard access with the team, then request sandbox access for testing.',
     },
     {
       h: 'Delivery reporting',
-      p: 'Every SMS includes a delivery report. Integrate through the API or dashboard.',
+      p: 'Review the delivery status reported for messages through the API or dashboard. A delivery status is not proof that a person read a message.',
     },
     {
       h: 'DLT assistance',
@@ -75,7 +68,7 @@ export const whyOrian = {
     },
     {
     h: 'DLT assistance',
-    p: 'Our compliance team files the entity, sender ID and message templates. Entity registration usually takes 2–3 business days; template review typically takes 24–48 hours after correct submission.',
+    p: 'Our team can guide you through preparing and submitting the entity, sender ID and message templates. Operator review times vary; ask for current requirements and estimates.',
     },
     {
     h: '24/7 support',
@@ -83,12 +76,12 @@ export const whyOrian = {
   },
   {
     h: 'Fast onboarding',
-    p: 'Most new clients reach their first live send in under 48 hours after documents arrive, subject to DLT approvals.',
+    p: 'Plan your first live send with the team around your documents, integration and any required approvals.',
     },
   ],
 };
 
 export const finalCta = {
   title: 'Planning a messaging project?',
-  lead: 'Get a sandbox key within minutes of signup and plan your first live send with our onboarding team.',
+  lead: 'Ask the team about sandbox access, technical documentation and a practical onboarding plan for your first live send.',
 };

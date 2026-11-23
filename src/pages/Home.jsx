@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import Seo from '../seo/Seo';
 import { pageMeta } from '../seo/pageMeta';
@@ -17,7 +16,7 @@ import GetInTouch from '../components/o2/GetInTouch';
 import { useCases } from '../data/useCases';
 import { useLang } from '../context/LangContext';
 import { Arrow } from '../components/o2/Icons';
-import { photo, photoProps } from '../utils/photo';
+import { photoProps } from '../utils/photo';
 
 const Home = () => {
   const { t } = useLang();

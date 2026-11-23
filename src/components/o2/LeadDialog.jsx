@@ -3,12 +3,12 @@ import Dialog from './Dialog';
 import LeadForm from './LeadForm';
 import { useLang } from '../../context/LangContext';
 
-const LeadDialog = ({ source, onClose }) => {
+const LeadDialog = ({ source, requirementType, initialMessage, open, onClose }) => {
   const { t } = useLang();
   return (
-    <Dialog title={t('form.title')} onClose={onClose}>
+    <Dialog title={t('form.title')} onClose={onClose} open={open}>
       <p className="o2-lead" style={{ marginBottom: '1.2rem' }}>{t('form.lead')}</p>
-      <LeadForm source={source} idPrefix="dlg" />
+      <LeadForm source={source} requirementType={requirementType} initialMessage={initialMessage} idPrefix="dlg" />
     </Dialog>
   );
 };

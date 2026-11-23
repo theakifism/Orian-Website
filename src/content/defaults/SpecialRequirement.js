@@ -3,10 +3,13 @@
 // edited falls back to what is written here.
 
 export const requirementTypes = [
+  'General Enquiry',
   'Bulk SMS & OTP Gateway',
   'Voice SMS & IVR',
   'DLT Assistance & Compliance',
   'WhatsApp Business API',
+  'Social Media Handling',
+  'Digital & IT Solutions',
   'Custom / Enterprise Solution',
   'Other',
 ];

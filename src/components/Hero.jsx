@@ -1,10 +1,8 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import HeroPhone from './o2/HeroPhone';
 import { useLang } from '../context/LangContext';
 import { useUI } from '../context/UIContext';
 import { Arrow, Tick } from './o2/Icons';
-import { HOME_METRICS } from '../data/homeCopy';
 
 const Hero = () => {
   const { t } = useLang();
@@ -39,9 +37,8 @@ const Hero = () => {
             </div>
 
             <dl className="o2-trust o2-in" style={{ '--d': '250ms' }}>
-              {HOME_METRICS.map((m) => (
-                <div key={m.label}><dt>{m.value}</dt><dd>{m.label}</dd></div>
-              ))}
+              <div><dt>SMS + OTP</dt><dd>Business messaging</dd></div>
+              <div><dt>Delivery status</dt><dd>Reporting via API or dashboard</dd></div>
             </dl>
 
             <ul className="o2-facts o2-in" style={{ '--d': '280ms' }}>

@@ -1,9 +1,8 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import SectionHead from './SectionHead';
 import { useLang } from '../../context/LangContext';
 import { Arrow } from './Icons';
-import { photo, photoProps } from '../../utils/photo';
+import { photoProps } from '../../utils/photo';
 
 // Photo, slug and a short label for each sector (links to the existing industry pages).
 const SECTORS = [

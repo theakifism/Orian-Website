@@ -29,7 +29,7 @@ const Detail = ({ slug }) => {
       );
     case 'social-media-handling':
       return <div className="d-posts" aria-hidden="true">{[0, 1, 2, 3, 4, 5].map((i) => <i key={i} style={{ '--i': i }} />)}</div>;
-    case 'it-solutions':
+    case 'digital-solutions':
       return (
         <div className="d-term" aria-hidden="true">
           <span>$ deploy --env production</span>
@@ -59,7 +59,7 @@ const Tile = ({ s, className, kicker, primary = false, H = 'h3', children }) => 
 
 /**
  * Bento layout: bulk SMS is the large primary tile; Voice, WhatsApp, Social
- * Media and IT Solutions are four tiles of identical size; DLT sits in a wide
+ * Media and Digital & IT Solutions are four tiles of identical size; DLT sits in a wide
  * strip because it is part of every SMS setup.
  */
 const BentoServices = ({ showHead = true }) => {
@@ -68,7 +68,19 @@ const BentoServices = ({ showHead = true }) => {
   const by = (slug) => services.find((x) => x.slug === slug);
   const sms = by('bulk-sms-otp-gateways');
   const dlt = by('dlt-compliance');
-  const small = ['voice-sms-ivr', 'whatsapp-business-api', 'social-media-handling', 'it-solutions'].map(by).filter(Boolean);
+  const small = [
+    'voice-sms-ivr', 'whatsapp-business-api', 'social-media-handling', 'digital-solutions',
+    'email-services', 'rcs-business-messaging', 'transaction-email',
+  ].map(by).filter(Boolean);
+  const kickerBySlug = {
+    'voice-sms-ivr': 'Messaging',
+    'whatsapp-business-api': 'Messaging',
+    'social-media-handling': 'Growth',
+    'email-services': 'Email',
+    'digital-solutions': 'Technology',
+    'rcs-business-messaging': 'Messaging',
+    'transaction-email': 'Email',
+  };
 
   return (
     <section className="o2 o2-sec" id="services" data-section="services-bento">
@@ -83,8 +95,8 @@ const BentoServices = ({ showHead = true }) => {
             <div className="o2-demo-slot"><Detail slug={sms.slug} /></div>
           </Tile>
 
-          {small.map((s, i) => (
-            <Tile key={s.slug} s={s} H={showHead ? 'h3' : 'h2'} className="o2-t-sm" kicker={['Messaging', 'Messaging', 'Growth', 'Technology'][i]}>
+          {small.map((s) => (
+            <Tile key={s.slug} s={s} H={showHead ? 'h3' : 'h2'} className="o2-t-sm" kicker={kickerBySlug[s.slug] || 'Service'}>
               <div className="o2-demo-slot"><Detail slug={s.slug} /></div>
             </Tile>
           ))}

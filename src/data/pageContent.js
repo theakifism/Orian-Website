@@ -25,7 +25,7 @@ export const pageContent = {
     ],
     faqTitle: 'Common questions',
     faqs: [
-      { q: 'How do I get my sender ID and templates approved?', a: 'Orian’s compliance team files your entity, sender ID and templates. Entity registration usually takes 2–3 business days; template review typically takes 24–48 hours after correct submission.' },
+      { q: 'How do I get my sender ID and templates approved?', a: 'Orian can guide you through preparing and submitting your entity, sender ID and templates. Operator review times vary; contact the team for current requirements and estimates.' },
       { q: 'Why was my message not delivered?', a: 'The usual causes are a template that does not match the registered text, a number with a do-not-disturb preference receiving a promotional message, an inactive number, or route congestion. The delivery report for the message shows the status and, where available, the reason.' },
       { q: 'How do I send OTPs from my application?', a: 'Register the OTP template, integrate through the Orian messaging API, then use each message’s delivery report to follow its status.' },
       { q: 'How do I reach support?', a: 'Call or email our 24/7 support team, or contact us on WhatsApp.' },
@@ -81,7 +81,7 @@ export const pageContent = {
     faqTitle: 'About Orian Teleservices',
     faqs: [
       { q: 'Where is Orian Teleservices based?', a: 'Orian Teleservices is based in Nagpur, Maharashtra, India.' },
-      { q: 'What services does Orian offer?', a: 'Bulk SMS and OTP gateways, voice SMS and IVR, WhatsApp Business API, DLT assistance and compliance, social media handling and IT solutions.' },
+      { q: 'What services does Orian offer?', a: 'Bulk SMS and OTP gateways, voice SMS and IVR, WhatsApp Business API, RCS messaging, Email Services, Transaction Email, DLT assistance and compliance, social media handling, and Digital & IT Solutions.' },
       { q: 'Does Orian handle traffic outside India?', a: 'India is our primary market, and international traffic is available on request.' },
     ],
   },
@@ -91,7 +91,7 @@ export const pageContent = {
       { title: 'Integrate through the API', p: 'Orian provides a messaging API and SMPP integration. Request the technical documentation and credentials from the team before implementation.' },
       { title: 'Plan delivery reporting', p: 'Every SMS includes a delivery report. Review the report status and use the API or webhook integration to update your application. Our [delivery reports guide](/resources/bulk-sms-delivery-reports-explained) explains common SMS status terminology.' },
       { title: 'Design for retries and duplicate events', p: 'Network calls can fail, and callbacks may be repeated. When the chosen integration supports retries or callbacks, use your own message reference, make processing safe to repeat and define an expiry for time-sensitive messages such as OTPs.' },
-      { title: 'Test in the sandbox', p: 'A sandbox API key is usually issued within minutes of signup. Use it to test message flows and webhook handling before sending to real users.' },
+      { title: 'Test in the sandbox', p: 'Ask the team about sandbox access so you can test message flows and webhook handling before sending to real users.' },
     ],
     faqTitle: 'Developer questions',
     faqs: [
@@ -103,7 +103,7 @@ export const pageContent = {
 
   services: {
     sections: [
-      { title: 'How the services fit together', p: 'Most customers start with the [bulk SMS and OTP gateway](/services/bulk-sms-otp-gateways) and add the others as they grow. [DLT assistance](/services/dlt-compliance) comes first, because nothing can be sent until sender IDs and templates are approved. [Voice and IVR](/services/voice-sms-ivr) backs up SMS for urgent messages, and the [WhatsApp Business API](/services/whatsapp-business-api) handles richer two-way conversations. [Social media handling](/services/social-media-handling) and [IT solutions](/services/it-solutions) support the rest of your customer-facing operation.' },
+      { title: 'How the services fit together', p: 'Most customers start with the [bulk SMS and OTP gateway](/services/bulk-sms-otp-gateways) and add the others as they grow. [DLT assistance](/services/dlt-compliance) comes first, because nothing can be sent until sender IDs and templates are approved. [Voice and IVR](/services/voice-sms-ivr) backs up SMS for urgent messages, and the [WhatsApp Business API](/services/whatsapp-business-api) handles richer two-way conversations. [Social media handling](/services/social-media-handling) and [Digital & IT Solutions](/services/digital-solutions) support the rest of your customer-facing operation.' },
       { title: 'Choosing where to begin', ul: ['Sending OTPs or alerts from an app: start with the SMS gateway and DLT assistance', 'Running promotions: add promotional templates and consent records', 'Needing a fallback for failed codes: add voice', 'Supporting customers in chat: add WhatsApp', 'Needing help with systems and hosting: add IT solutions'] },
     ],
     faqTitle: 'Questions about our services',

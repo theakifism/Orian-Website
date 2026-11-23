@@ -10,10 +10,10 @@ export const homeFaqs = [
   },
   {
     q: 'What registration do I need to send bulk SMS in India?',
-    a: 'You need DLT registration of your business entity, sender IDs (headers) and message templates, plus recorded consent for promotional traffic. Orian files these with you. Entity registration usually takes 2–3 business days; correctly submitted templates typically take 24–48 hours for review.',
+    a: 'You need DLT registration of your business entity, sender IDs (headers) and message templates, plus recorded consent for promotional traffic. Orian can guide you through the process. Operator review times vary, so ask the team for current requirements and estimates.',
   },
   {
     q: 'How long does onboarding take?',
-    a: 'A sandbox API key is usually issued within minutes of signup. Most clients reach their first live send in under 48 hours after documents arrive; DLT approval timing depends on the operator review.',
+    a: 'Sandbox access and the first live send depend on your account, documentation and any required operator approvals. Contact the team for current requirements and timing.',
   },
 ];

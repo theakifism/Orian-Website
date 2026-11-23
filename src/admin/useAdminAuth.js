@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { readJsonResponse } from '../utils/http';
 
 // How often an already-authenticated tab re-checks /api/admin/me. This is
 // what makes "signed out because another device logged in" actually show up
@@ -22,10 +23,10 @@ export default function useAdminAuth() {
       fetch('/api/admin/me', { credentials: 'same-origin' })
         .then(async (res) => {
           if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
+            const data = await readJsonResponse(res).catch(() => ({}));
             throw new Error(data.error || 'Not authenticated');
           }
-          return res.json();
+          return readJsonResponse(res);
         })
         .then((data) => {
           if (cancelled) return;

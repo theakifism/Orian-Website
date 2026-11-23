@@ -57,6 +57,14 @@ export const ChatIcon = ({ className = 'w-6 h-6' }) => (
   </svg>
 );
 
+// Envelope — used for email communication services.
+export const MailIcon = ({ className = 'w-6 h-6' }) => (
+  <svg {...base} className={className}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <path d="m4 7 8 6 8-6" />
+  </svg>
+);
+
 // Headset — used for support.
 export const HeadsetIcon = ({ className = 'w-6 h-6' }) => (
   <svg {...base} className={className}>

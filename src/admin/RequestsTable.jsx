@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { ArrowUp, ArrowDown, Download, Search, MessageSquarePlus, ChevronDown, ChevronUp, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Skeleton from './Skeleton';
 import { downloadCsv } from './csv';
@@ -24,6 +24,31 @@ const COLUMNS = [
   { key: 'status', label: 'Status', sortable: true },
 ];
 
+const PaginationBar = ({ page, totalPages, onPageChange }) =>
+  totalPages > 1 ? (
+    <div className="flex items-center justify-between gap-3 mt-4 flex-wrap">
+      <p className="text-xs text-[var(--text-dim)]">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onPageChange?.(page - 1)}
+          disabled={page <= 1}
+          className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] disabled:opacity-40 disabled:hover:bg-[var(--overlay)] transition-colors"
+        >
+          <ChevronLeft size={13} /> Previous
+        </button>
+        <button
+          type="button"
+          onClick={() => onPageChange?.(page + 1)}
+          disabled={page >= totalPages}
+          className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] disabled:opacity-40 disabled:hover:bg-[var(--overlay)] transition-colors"
+        >
+          Next <ChevronRight size={13} />
+        </button>
+      </div>
+    </div>
+  ) : null;
+
 const RequestsTable = ({
   requests,
   loading,
@@ -47,15 +72,6 @@ const RequestsTable = ({
   const [noteDraft, setNoteDraft] = useState('');
   const [savingNote, setSavingNote] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-
-  // A fresh page/filter/search result is a different set of rows entirely —
-  // carrying a selection or an expanded note panel over from the previous
-  // page just leads to bulk actions silently hitting rows the admin can no
-  // longer see. Reset both whenever the underlying data changes.
-  useEffect(() => {
-    setSelected(new Set());
-    setExpandedId(null);
-  }, [requests]);
 
   const sorted = useMemo(() => {
     if (!requests) return [];
@@ -146,29 +162,6 @@ const RequestsTable = ({
   const rangeStart = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const rangeEnd = Math.min(page * pageSize, total);
 
-  const PaginationBar = () =>
-    totalPages > 1 ? (
-      <div className="flex items-center justify-between gap-3 mt-4 flex-wrap">
-        <p className="text-xs text-[var(--text-dim)]">Page {page} of {totalPages}</p>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onPageChange?.(page - 1)}
-            disabled={page <= 1}
-            className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] disabled:opacity-40 disabled:hover:bg-[var(--overlay)] transition-colors"
-          >
-            <ChevronLeft size={13} /> Previous
-          </button>
-          <button
-            onClick={() => onPageChange?.(page + 1)}
-            disabled={page >= totalPages}
-            className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[var(--overlay)] hover:bg-[var(--border)] disabled:opacity-40 disabled:hover:bg-[var(--overlay)] transition-colors"
-          >
-            Next <ChevronRight size={13} />
-          </button>
-        </div>
-      </div>
-    ) : null;
-
   return (
     <div>
       {/* Search + filter bar */}
@@ -199,8 +192,9 @@ const RequestsTable = ({
         {showFilters && (
           <div className="flex items-end gap-3 flex-wrap bg-[var(--overlay)] border border-[var(--border)] rounded-lg p-3">
             <div>
-              <label className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1">Status</label>
+              <label htmlFor="requests-filter-status" className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1">Status</label>
               <select
+                id="requests-filter-status"
                 value={filters?.status || ''}
                 onChange={(e) => setFilter('status', e.target.value)}
                 className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs"
@@ -210,8 +204,9 @@ const RequestsTable = ({
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1">From</label>
+              <label htmlFor="requests-filter-from" className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1">From</label>
               <input
+                id="requests-filter-from"
                 type="date"
                 value={filters?.dateFrom || ''}
                 onChange={(e) => setFilter('dateFrom', e.target.value)}
@@ -219,8 +214,9 @@ const RequestsTable = ({
               />
             </div>
             <div>
-              <label className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1">To</label>
+              <label htmlFor="requests-filter-to" className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1">To</label>
               <input
+                id="requests-filter-to"
                 type="date"
                 value={filters?.dateTo || ''}
                 onChange={(e) => setFilter('dateTo', e.target.value)}
@@ -228,8 +224,9 @@ const RequestsTable = ({
               />
             </div>
             <div>
-              <label className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1">Assigned to</label>
+              <label htmlFor="requests-filter-assignee" className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-1">Assigned to</label>
               <select
+                id="requests-filter-assignee"
                 value={filters?.assignedTo || ''}
                 onChange={(e) => setFilter('assignedTo', e.target.value)}
                 className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-xs"
@@ -439,7 +436,7 @@ const RequestsTable = ({
         </table>
       </div>
       <div className="hidden md:block">
-        <PaginationBar />
+        <PaginationBar page={page} totalPages={totalPages} onPageChange={onPageChange} />
       </div>
 
       {/* Mobile: stacked cards instead of a table that needed horizontal
@@ -553,7 +550,7 @@ const RequestsTable = ({
             No requests match these filters.
           </div>
         )}
-        <PaginationBar />
+        <PaginationBar page={page} totalPages={totalPages} onPageChange={onPageChange} />
       </div>
     </div>
   );

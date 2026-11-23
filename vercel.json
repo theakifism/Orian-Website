@@ -66,6 +66,11 @@
   ],
   "redirects": [
     {
+      "source": "/services/it-solutions",
+      "destination": "/services/digital-solutions",
+      "statusCode": 301
+    },
+    {
       "source": "/(.*)",
       "has": [
         {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Megaphone, FileText, Trash2, Upload, Eye } from 'lucide-react';
 import { AnnouncementDialog } from '../components/AnnouncementBanner';
+import { readJsonResponse } from '../utils/http';
 
 const inputClasses =
   'w-full bg-[var(--overlay)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/40 transition-colors';
@@ -22,7 +23,7 @@ const AnnouncementsSection = () => {
 
   const load = () => {
     fetch('/api/admin/announcements', { credentials: 'same-origin' })
-      .then((res) => res.json())
+      .then((res) => readJsonResponse(res))
       .then((data) => setAnnouncements(data.announcements || []))
       .catch(() => setError('Could not load announcements.'));
   };
@@ -41,7 +42,7 @@ const AnnouncementsSection = () => {
         credentials: 'same-origin',
         body: JSON.stringify(form),
       });
-      const data = await res.json();
+      const data = await readJsonResponse(res);
       if (!res.ok) throw new Error(data.error || 'Could not create announcement.');
       setForm({ message: '', emoji: '🎉' });
       load();
@@ -183,7 +184,7 @@ const DocumentsSection = () => {
 
   const load = () => {
     fetch('/api/admin/documents', { credentials: 'same-origin' })
-      .then((res) => res.json())
+      .then((res) => readJsonResponse(res))
       .then((data) => setDocuments(data.documents || []))
       .catch(() => setError('Could not load documents.'));
   };
@@ -217,7 +218,7 @@ const DocumentsSection = () => {
         credentials: 'same-origin',
         body: JSON.stringify({ ...form, filename: file.name, mimeType: file.type, fileDataBase64 }),
       });
-      const data = await res.json();
+      const data = await readJsonResponse(res);
       if (!res.ok) throw new Error(data.error || 'Could not upload the file.');
       setForm({ title: '', description: '', category: '' });
       setFile(null);

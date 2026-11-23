@@ -17,8 +17,8 @@ export const industries = [
     blurb: 'Use cases include 2FA OTPs, fraud alerts and transactional notices. Confirm delivery and compliance requirements for your service.',
     overview: 'Banks, payment providers and NBFCs use messages for authentication, account notices and fraud alerts. Discuss delivery requirements, data handling and supported integration options with Orian before selecting a service.',
     useCases: [
-      'Sub-3s 2FA authentication OTPs',
-      'Real-time transaction debits & credit balance alerts',
+      'Two-factor authentication and account access codes',
+      'Transaction notifications for account activity',
       'Suspicious login & card freeze warnings',
       'EMI schedule & automated loan recovery reminders',
     ],
@@ -31,7 +31,7 @@ export const industries = [
     name: 'E-Commerce & Retail',
     color: 'emerald',
     hover: 'hover:bg-emerald-500/20 hover:border-emerald-400 hover:text-emerald-300',
-    blurb: 'Instant delivery OTPs, order dispatches, and high-throughput promotional broadcasts.',
+    blurb: 'Order verification, dispatch updates, and promotional campaign messages.',
     overview: 'Retail teams use messages for order updates, verification and promotions. Share your expected traffic and customer journey with Orian to discuss available services and onboarding.',
     useCases: [
       'Cash-on-Delivery (COD) verification & delivery OTPs',
@@ -70,7 +70,7 @@ export const industries = [
     name: 'Education & EdTech',
     color: 'purple',
     hover: 'hover:bg-[#00AEEF]/20 hover:border-[#00AEEF] hover:text-[#00AEEF]',
-    blurb: 'Exam alerts, parent notifications, and attendance updates sent instantly.',
+    blurb: 'Exam notices, parent notifications, and attendance updates.',
     overview: 'Education teams use messages for attendance updates, exam notices and schedule changes. Orian supports API and dashboard integration, delivery reports and sandbox testing.',
     useCases: [
       'Daily student attendance & absence alerts to parents',
@@ -93,7 +93,7 @@ export const industries = [
     color: 'blue',
     hover: 'hover:bg-[#00AEEF]/20 hover:border-[#00AEEF] hover:text-[#00AEEF]',
     blurb: 'Multi-factor login authentication, shift updates, and vendor notifications.',
-    overview: 'Large corporate organizations route enterprise logins, HR communications, and vendor verification alerts through Orian’s reliable gateway APIs, ensuring high deliverability without vendor lock-in.',
+    overview: 'Enterprise teams may use SMS for login codes, HR notifications and vendor alerts. Discuss data handling, integration requirements, available routing options and how the service would fit with existing systems.',
     useCases: [
       'Enterprise VPN and single sign-on (SSO) login OTPs',
       'Vendor invoice dispatch & payment confirmations',
@@ -104,7 +104,7 @@ export const industries = [
       'bulk-sms-otp-gateways',
       'dlt-compliance',
       'whatsapp-business-api',
-      'it-solutions',
+      'digital-solutions',
       'social-media-handling',
     ],
   },
@@ -119,7 +119,7 @@ export const industries = [
     overview: 'Software teams may use messaging for registration, password resets and service alerts. Orian provides API integration and per-message delivery reports, with sandbox access for testing.',
     useCases: [
       'Product sign-up and password reset 2FA OTPs',
-      'Real-time cloud server breach & downtime alerts',
+      'Cloud service and downtime notifications',
       'Multi-tenant application alert triggers',
       'API-driven user authentication flows',
     ],
@@ -127,7 +127,7 @@ export const industries = [
       'bulk-sms-otp-gateways',
       'voice-sms-ivr',
       'dlt-compliance',
-      'it-solutions',
+      'digital-solutions',
     ],
   },
 ];

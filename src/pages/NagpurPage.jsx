@@ -44,7 +44,7 @@ const NagpurPage = () => {
         breadcrumbs={[{ label: 'Bulk SMS in Nagpur' }]}
       >
         <div className="o2-cta-row" style={{ marginTop: '2rem' }}>
-          <button type="button" className="o2-btn o2-btn-primary" onClick={() => openLead('nagpur')} data-track="nagpur_talk_to_us">Talk to our Nagpur team <Arrow /></button>
+          <button type="button" className="o2-btn o2-btn-primary" onClick={() => openLead('nagpur', { requirementType: 'Bulk SMS & OTP Gateway', initialMessage: 'I am looking for messaging services for my business in Nagpur.' })} data-track="nagpur_talk_to_us">Talk to our Nagpur team <Arrow /></button>
           <a className="o2-btn o2-btn-ghost" href={`tel:${PHONE_PRIMARY}`}>Call {PHONE_PRIMARY_DISPLAY}</a>
         </div>
       </PageHeader>

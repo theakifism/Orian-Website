@@ -1,12 +1,4 @@
-// Run with: npm run generate-sitemap (also runs automatically before
-// `npm run build`, see package.json). Writes public/sitemap.xml so it's
-// picked up by Vite's static public-dir copy during the SSG build.
-//
-// Every real, indexable public route is listed here explicitly or derived
-// from the same data files src/routes.jsx uses for getStaticPaths, so the
-// sitemap can't silently drift out of sync with the actual site. The
-// /admin* routes are intentionally excluded — they're disallowed in
-// robots.txt and shouldn't be indexed.
+
 import { writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -20,9 +12,11 @@ import { guideModified } from '../src/seo/lastmod.js';
 import { buildData } from '../src/content/build-data.js';
 
 const services = buildData('services');
+
 const industries = buildData('industries');
 const whyUsData = buildData('whyUs');
 const useCases = buildData('useCases');
+
 const guides = buildData('guides');
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

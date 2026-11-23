@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Sparkles, RefreshCw } from 'lucide-react';
+import { readJsonResponse } from '../utils/http';
 
 // Splits the plain-text response from the API into a headline paragraph and
 // a bullet list, based on the "Headline: ... / Suggested actions: - ..."
@@ -27,7 +28,7 @@ const AIInsights = () => {
     setError('');
     try {
       const res = await fetch('/api/admin/ai-insights', { method: 'POST', credentials: 'same-origin' });
-      const data = await res.json();
+      const data = await readJsonResponse(res);
       if (!res.ok) throw new Error(data.error || 'Could not generate insights.');
       setInsights({ ...parseInsights(data.text), generatedAt: data.generatedAt });
       setState('ready');

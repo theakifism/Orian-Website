@@ -34,7 +34,7 @@ const IndustriesPage = () => {
         eyebrow="Sectors We Serve"
         title="Messaging tuned for"
         gradientWord="every industry."
-        subtitle="Whatever you sell, your customers expect to hear from you instantly. See exactly how banks, hospitals, retailers and 17 other sectors use Orian's SMS, voice and WhatsApp channels to cut response time and win more repeat business."
+        subtitle="Explore example messaging workflows for banking, healthcare, retail, education, enterprise and IT. Discuss whether SMS, voice, WhatsApp or DLT assistance fits your organization's needs."
         breadcrumbs={[{ label: 'Industries' }]}
       />
 

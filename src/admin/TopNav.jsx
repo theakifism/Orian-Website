@@ -2,9 +2,7 @@ import { Bell, ExternalLink, LogOut } from 'lucide-react';
 import { TABS } from './adminTabs';
 
 /**
- * Top navigation (desktop) + bottom tab bar (phones). Same structure as the
- * public site's header: logo on the left, pill links in the middle, actions on
- * the right.
+ * Top navigation (desktop) plus bottom section navigation on smaller screens.
  */
 const TopNav = ({ tab, onTabChange, newCount, admin, onLogout }) => (
   <>
@@ -27,7 +25,7 @@ const TopNav = ({ tab, onTabChange, newCount, admin, onLogout }) => (
         <div className="ad-tools">
           <div className="ad-user">
             <b>{admin?.name}</b>
-            <span>{admin?.role === 'superadmin' ? 'Superadmin' : 'Team member'}</span>
+            <span>{admin?.role === 'superadmin' ? 'Superadmin' : 'Developer'}</span>
           </div>
           <button type="button" className="ad-tab" onClick={() => onTabChange('leads')} aria-label={newCount > 0 ? `${newCount} new leads` : 'No new leads'} style={{ padding: '0 0.65rem' }}>
             <span style={{ position: 'relative', display: 'inline-grid' }}>

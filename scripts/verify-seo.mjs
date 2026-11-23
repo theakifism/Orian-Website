@@ -2,6 +2,7 @@
 // Checks every public page in dist/ and exits non-zero on any failure.
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import path from 'node:path';
+import { SITE_URL } from '../src/seo/siteConfig.js';
 
 const DIST = 'dist';
 const SKIP = [/^admin(\/|\.html$)/, /^404\.html$/, /^api\//];
@@ -83,7 +84,7 @@ for (const rel of pages) {
   else titles.set(title, rel);
   if (descs.has(desc)) fail(rel, `duplicate description also on ${descs.get(desc)}`);
   else descs.set(desc, rel);
-  if (!canonical.startsWith('https://www.orianteleservices.com')) fail(rel, `bad canonical "${canonical}"`);
+  if (!canonical.startsWith(SITE_URL)) fail(rel, `bad canonical "${canonical}" (expected ${SITE_URL})`);
   if (/REPLACE_WITH/i.test(html)) fail(rel, 'placeholder text (REPLACE_WITH…) shipped');
   if (/Sample layout|to be confirmed|>To confirm<|to be supplied|Client logo|Testimonial text|PE ID to be|empty slots|Front-end only|Connect this page to your real|REPLACE_WITH|lorem ipsum/i.test(html)) fail(rel, 'draft/placeholder wording is visible in an indexable page');
   if (/TODO\((content|review)\)/i.test(html)) fail(rel, 'TODO(content)/TODO(review) marker is visible in the output');
@@ -182,7 +183,7 @@ if (existsSync(path.join(DIST, 'sitemap.xml'))) {
   }
   for (const rel of pages.filter((r) => !noindexPages.has(r))) {
     const p = rel === 'index.html' ? '/' : `/${rel.replace(/\.html$/, '')}`;
-    if (!locs.includes(`https://www.orianteleservices.com${p === '/' ? '/' : p}`)) fail('sitemap.xml', `public page ${p} missing from sitemap`);
+    if (!locs.includes(`${SITE_URL}${p === '/' ? '/' : p}`)) fail('sitemap.xml', `public page ${p} missing from sitemap`);
   }
 } else fail('sitemap.xml', 'not found in dist');
 

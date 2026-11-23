@@ -1,9 +1,8 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import Reveal from './Reveal';
 import { industries } from '../data/industries';
 import { services } from '../data/services';
-import { ShareIcon, CodeIcon } from './CardIcons';
+import { ShareIcon, CodeIcon, ChatIcon, MailIcon } from './CardIcons';
 import { whyUsData } from '../data/whyUs';
 import { photoProps } from '../utils/photo';
 
@@ -15,7 +14,7 @@ import { photoProps } from '../utils/photo';
  * src/assets/images/home/. A missing file never shows a broken-image icon --
  * the tile just keeps its soft background.
  */
-const Photo = ({ name, alt, className = '', imgClassName = '', priority = false }) => (
+const Photo = ({ name, alt, className = '', imgClassName = '' }) => (
   <div className={`${className.includes('absolute') ? '' : 'relative'} overflow-hidden bg-(--overlay) ${className}`}>
     <img
       {...photoProps(name, "(min-width: 1280px) 640px, (min-width: 768px) 50vw, 100vw")}
@@ -74,8 +73,8 @@ export const ServicesPhotoCards = () => (
     <div className="max-w-7xl mx-auto px-6">
       <SectionHead
         eyebrow="What we do"
-        title="Messaging, social and IT. One partner."
-        sub="Tap any service to see how it works and who uses it."
+        title="Messaging, email and digital support. One partner."
+        sub="Explore our services and discuss the right scope for your business."
         to="/services"
         cta="All services"
       />
@@ -86,7 +85,7 @@ export const ServicesPhotoCards = () => (
               {s.hasPhoto === false ? (
                 <div className="aspect-4/3 flex items-center justify-center bg-(--surface-alt)" style={{ backgroundImage: `radial-gradient(circle at 50% 40%, ${s.accentColor}22, transparent 65%)` }}>
                   <span className="w-16 h-16 rounded-2xl border flex items-center justify-center" style={{ borderColor: `${s.accentColor}55`, color: s.accentColor, background: `${s.accentColor}14` }}>
-                    {s.icon === 'social' ? <ShareIcon className="w-8 h-8" /> : <CodeIcon className="w-8 h-8" />}
+                    {s.icon === 'social' ? <ShareIcon className="w-8 h-8" /> : s.icon === 'email' ? <MailIcon className="w-8 h-8" /> : s.icon === 'chat' ? <ChatIcon className="w-8 h-8" /> : <CodeIcon className="w-8 h-8" />}
                   </span>
                 </div>
               ) : (

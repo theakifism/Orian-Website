@@ -40,7 +40,7 @@ const UseCaseDetailPage = () => {
         breadcrumbs={[{ label: 'Use cases', href: '/use-cases' }, { label: u.title }]}
       >
         <div className="o2-cta-row" style={{ marginTop: '2rem' }}>
-          <button type="button" className="o2-btn o2-btn-primary" onClick={() => openLead(`usecase-${u.slug}`)} data-track="usecase_talk_to_us">Talk to us <Arrow /></button>
+          <button type="button" className="o2-btn o2-btn-primary" onClick={() => openLead(`usecase-${u.slug}`, { requirementType: 'Bulk SMS & OTP Gateway', initialMessage: `I’m interested in using messaging for ${u.title}. Please help me understand the right setup.` })} data-track="usecase_talk_to_us">Talk to us <Arrow /></button>
           <Link to="/developers" className="o2-btn o2-btn-ghost">Discuss integration</Link>
         </div>
       </PageHeader>

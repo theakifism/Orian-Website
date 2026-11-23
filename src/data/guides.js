@@ -76,7 +76,7 @@ export const guides = [
     read: '7 min read',
     metaTitle: 'SMPP vs REST API for SMS: How to Choose | Orian',
     metaDescription: 'Compare SMPP and REST API for sending SMS: throughput, connection handling, delivery reports and complexity, with advice on which suits your system.',
-    services: ['bulk-sms-otp-gateways', 'it-solutions'],
+    services: ['bulk-sms-otp-gateways', 'digital-solutions'],
   },
   {
     slug: 'sender-id-approval-guide',

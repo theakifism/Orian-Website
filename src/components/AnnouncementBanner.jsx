@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Arrow, Close } from './o2/Icons';
+import { readJsonResponse } from '../utils/http';
 
 const DISMISSED_KEY = 'orian-dismissed-announcement';
 const OPEN_DELAY_MS = 900; // let the page paint first, then bring the popup in
@@ -101,7 +102,7 @@ const AnnouncementBanner = () => {
     let cancelled = false;
     let timer;
     fetch('/api/announcement')
-      .then((res) => res.json())
+      .then((res) => readJsonResponse(res))
       .then((data) => {
         if (cancelled || !data?.announcement) return;
         let dismissed = null;

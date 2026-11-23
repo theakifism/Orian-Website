@@ -57,9 +57,15 @@ const GetInTouch = () => {
             </div>
           </div>
 
-          {/* 3. Special requirement form */}
+          {/* Use the open space in the closing section for the complete enquiry form. */}
           <div className="o2-touch-right">
-            <SpecialRequirement embedded />
+            <SpecialRequirement
+              embedded
+              source="home-get-in-touch"
+              formEyebrow="Start a conversation"
+              formTitle="Tell us what your business needs."
+              formDescription="Share your messaging goals with our team. We’ll help you choose the right service and next steps."
+            />
           </div>
         </div>
       </div>

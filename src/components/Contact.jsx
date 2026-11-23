@@ -22,9 +22,9 @@ const Contact = () => {
             >
               <span className="text-xs font-mono text-[var(--text-faint)] block mb-2 transition-colors duration-300 group-hover:text-[#00AEEF]"><T k="Contact.1" d={"24/7 CUSTOMER HELPLINE"} /></span>
               <div className="space-y-1 font-mono text-lg font-bold text-[var(--text)] transition-all duration-300 group-hover:scale-[1.03] group-hover:text-[#00AEEF] origin-left">
-                <p className="cursor-pointer"><T k="Contact.2" d={"+91 95525 56786"} /></p>
-                <p className="cursor-pointer"><T k="Contact.3" d={"+91 95525 01029"} /></p>
-                <p className="cursor-pointer"><T k="Contact.4" d={"+91 98500 87786"} /></p>
+                <p className="cursor-pointer"><T k="Contact.2" d={"+91 98500 87786"} /></p>
+                <p className="cursor-pointer"><T k="Contact.3" d={"+91 95525 56786"} /></p>
+                <p className="cursor-pointer"><T k="Contact.4" d={"+91 95525 60060"} /></p>
               </div>
             </div>
 

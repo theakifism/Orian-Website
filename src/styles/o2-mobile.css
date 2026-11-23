@@ -70,7 +70,7 @@ html, body { overflow-x: clip; }
 
   /* ---- dialogs become bottom sheets ---- */
   .o2-scrim { align-items: end; padding: 0; }
-  .o2-dialog { width: 100%; max-height: 90svh; border-radius: 26px 26px 0 0; }
+  .o2-dialog { width: 100%; max-height: 90vh; max-height: 90svh; border-radius: 26px 26px 0 0; }
 }
 
 /* very small phones (<= 360px) */

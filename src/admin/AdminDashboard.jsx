@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNav from './TopNav';
 import { TABS } from './adminTabs';
@@ -10,6 +10,7 @@ import SitePanel from './SitePanel';
 import SystemPanel from './SystemPanel';
 import SettingsPanel from './SettingsPanel';
 import { PageHead } from './ui';
+import { readJsonResponse } from '../utils/http';
 import './admin.css';
 
 const EMPTY_FILTERS = { q: '', status: '', dateFrom: '', dateTo: '', assignedTo: '' };
@@ -39,7 +40,7 @@ const AdminDashboard = ({ admin }) => {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [requestPage, setRequestPage] = useState(1);
   const [visitorPage, setVisitorPage] = useState(1);
-  const [loadError, setLoadError] = useState('');
+  const [loadErrors, setLoadErrors] = useState({ visitors: '', requests: '', action: '' });
   const [loadingVisitors, setLoadingVisitors] = useState(true);
   const [loadingRequests, setLoadingRequests] = useState(true);
 
@@ -53,10 +54,16 @@ const AdminDashboard = ({ admin }) => {
     document.documentElement.classList.add('dark');
   }, []);
 
+  // Run after the selected panel has committed. Scrolling before changing
+  // tabs lets browser scroll anchoring preserve the old panel's offset and
+  // place the new page heading underneath the fixed header.
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [tab]);
+
   const setTab = useCallback((next) => {
     setTabState(next);
     window.history.replaceState(null, '', next === 'overview' ? window.location.pathname : `#${next}`);
-    window.scrollTo({ top: 0 });
   }, []);
 
   useEffect(() => {
@@ -69,15 +76,15 @@ const AdminDashboard = ({ admin }) => {
     fetch(`/api/admin/visitors?page=${targetPage}`, { credentials: 'same-origin' })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load visitor data');
-        return res.json();
+        return readJsonResponse(res);
       })
       .then((data) => {
         setVisitorData(data);
-        setLoadError('');
+        setLoadErrors((prev) => ({ ...prev, visitors: '' }));
         setLoadingVisitors(false);
       })
       .catch(() => {
-        setLoadError('Could not load visitor data.');
+        setLoadErrors((prev) => ({ ...prev, visitors: 'Could not load visitor data.' }));
         setLoadingVisitors(false);
       });
   }, []);
@@ -91,22 +98,22 @@ const AdminDashboard = ({ admin }) => {
     fetch(`/api/admin/requests?${params.toString()}`, { credentials: 'same-origin' })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load requests');
-        return res.json();
+        return readJsonResponse(res);
       })
       .then((data) => {
         setRequestData({ ...data, __fetchedAt: Date.now() });
-        setLoadError('');
+        setLoadErrors((prev) => ({ ...prev, requests: '' }));
         setLoadingRequests(false);
       })
       .catch(() => {
-        setLoadError('Could not load requests.');
+        setLoadErrors((prev) => ({ ...prev, requests: 'Could not load requests.' }));
         setLoadingRequests(false);
       });
   }, []);
 
   const fetchAdmins = useCallback(() => {
     fetch('/api/admin/team', { credentials: 'same-origin' })
-      .then((res) => res.json())
+      .then((res) => readJsonResponse(res))
       .then((data) => setAdmins(data.admins || []))
       .catch(() => {});
   }, []);
@@ -142,11 +149,19 @@ const AdminDashboard = ({ admin }) => {
   };
 
   const handleLogout = async () => {
-    await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
-    navigate('/admin/login', { replace: true });
+    try {
+      const res = await fetch('/api/admin/logout', { method: 'POST', credentials: 'same-origin' });
+      if (!res.ok) throw new Error('Logout request failed');
+      navigate('/admin/login', { replace: true });
+    } catch {
+      setLoadErrors((prev) => ({ ...prev, action: 'Could not sign out. Check your connection and try again.' }));
+    }
   };
 
+  const clearActionError = () => setLoadErrors((prev) => ({ ...prev, action: '' }));
+
   const updateStatus = async (id, status) => {
+    clearActionError();
     setRequestData((prev) => ({
       ...prev,
       requests: prev.requests.map((r) => (r.id === id ? { ...r, status } : r)),
@@ -159,12 +174,13 @@ const AdminDashboard = ({ admin }) => {
       body: JSON.stringify({ id, status }),
     }).catch(() => null);
     if (!res || !res.ok) {
-      setLoadError('Could not update that request — try again.');
+      setLoadErrors((prev) => ({ ...prev, action: 'Could not update that request — try again.' }));
       loadRequests();
     }
   };
 
   const bulkUpdateStatus = async (ids, status) => {
+    clearActionError();
     setRequestData((prev) => ({
       ...prev,
       requests: prev.requests.map((r) => (ids.includes(r.id) ? { ...r, status } : r)),
@@ -176,12 +192,13 @@ const AdminDashboard = ({ admin }) => {
       body: JSON.stringify({ ids, status }),
     }).catch(() => null);
     if (!res || !res.ok) {
-      setLoadError('Could not update those requests — try again.');
+      setLoadErrors((prev) => ({ ...prev, action: 'Could not update those requests — try again.' }));
     }
     loadRequests();
   };
 
   const assignRequest = async (id, assignedTo) => {
+    clearActionError();
     setRequestData((prev) => ({
       ...prev,
       requests: prev.requests.map((r) => (r.id === id ? { ...r, assigned_to: assignedTo } : r)),
@@ -193,12 +210,13 @@ const AdminDashboard = ({ admin }) => {
       body: JSON.stringify({ id, assignedTo }),
     }).catch(() => null);
     if (!res || !res.ok) {
-      setLoadError('Could not assign that request — try again.');
+      setLoadErrors((prev) => ({ ...prev, action: 'Could not assign that request — try again.' }));
       loadRequests();
     }
   };
 
   const addNote = async (id, note) => {
+    clearActionError();
     const res = await fetch('/api/admin/requests', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -206,13 +224,18 @@ const AdminDashboard = ({ admin }) => {
       body: JSON.stringify({ id, note }),
     }).catch(() => null);
     if (res && res.ok) {
-      const data = await res.json();
-      setRequestData((prev) => ({
-        ...prev,
-        requests: prev.requests.map((r) => (r.id === id ? { ...r, notes: data.notes } : r)),
-      }));
+      try {
+        const data = await readJsonResponse(res);
+        setRequestData((prev) => ({
+          ...prev,
+          requests: prev.requests.map((r) => (r.id === id ? { ...r, notes: data.notes } : r)),
+        }));
+      } catch {
+        setLoadErrors((prev) => ({ ...prev, action: 'Could not save that note — try again.' }));
+        loadRequests();
+      }
     } else {
-      setLoadError('Could not save that note — try again.');
+      setLoadErrors((prev) => ({ ...prev, action: 'Could not save that note — try again.' }));
     }
   };
 
@@ -235,7 +258,9 @@ const AdminDashboard = ({ admin }) => {
 
       <main className="ad-main">
         <PageHead eyebrow={heading.eyebrow} title={heading.title(admin)} />
-        {loadError && <p role="alert" className="text-sm text-rose-300 mb-4">{loadError}</p>}
+        {Object.values(loadErrors).filter(Boolean).map((message) => (
+          <p key={message} role="alert" className="text-sm text-rose-300 mb-4">{message}</p>
+        ))}
 
         {tab === 'overview' && <OverviewPanel onOpenLead={setOpenLead} onGoTab={setTab} />}
 

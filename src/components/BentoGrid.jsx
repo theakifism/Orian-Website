@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import Reveal from './Reveal';
 import { photoProps } from '../utils/photo';
@@ -38,7 +37,7 @@ const BentoGrid = () => {
               </svg>
               <div className="relative">
                 <h3 className="text-2xl md:text-3xl font-extrabold leading-tight mb-2">
-                  First live send in under 48 hours for most clients.
+                  Plan your first live send with the onboarding team.
                 </h3>
                 <span className="inline-flex items-center gap-1.5 text-sm font-semibold underline underline-offset-4 group-hover:gap-2.5 transition-all">
                   See how it works &rarr;

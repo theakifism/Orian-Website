@@ -214,6 +214,7 @@ const LeadsPanel = ({
       ) : (
         <Card className="p-0 overflow-hidden">
           <RequestsTable
+            key={`${requestPage}:${JSON.stringify(filters)}`}
             requests={requestData?.requests?.map((l) => mergePatch(l, patches[l.id], requestData.__fetchedAt))}
             loading={loadingRequests}
             onUpdateStatus={onUpdateStatus}

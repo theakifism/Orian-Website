@@ -18,9 +18,9 @@ const topics = [
 ];
 const steps = [
   { title: 'Share your documents', desc: 'We tell you which business documents are needed for your type of entity.' },
-  { title: 'Register the entity', desc: 'We help you complete DLT entity registration, which usually takes 2–3 business days.' },
+  { title: 'Register the entity', desc: 'We help you prepare and submit DLT entity registration. Processing time depends on the operator and the submitted information.' },
   { title: 'Register sender IDs', desc: 'Headers are submitted and linked to your entity.' },
-  { title: 'Register templates', desc: 'Each message type is written as a template; correctly submitted templates are typically reviewed in 24–48 hours.' },
+  { title: 'Register templates', desc: 'Each message type is written as a template for operator review. Review times vary; the team can share current guidance.' },
   { title: 'Set up consent', desc: 'For promotional sending, consent capture and opt-out are put in place.' },
   { title: 'Test and go live', desc: 'Approved headers and templates are mapped to your account and tested.' },
 ];
@@ -42,7 +42,7 @@ const CompliancePage = () => {
         breadcrumbs={[{ label: 'Compliance' }]}
       >
         <div className="o2-cta-row" style={{ marginTop: '2rem' }}>
-          <button type="button" className="o2-btn o2-btn-primary" onClick={() => openLead('compliance')} data-track="compliance_talk_to_us">Start registration <Arrow /></button>
+          <button type="button" className="o2-btn o2-btn-primary" onClick={() => openLead('compliance', { requirementType: 'DLT Assistance & Compliance', initialMessage: 'I need help with DLT registration. My current stage is: ' })} data-track="compliance_talk_to_us">Start registration <Arrow /></button>
         </div>
         <p className="o2-note" style={{ marginTop: '1.2rem' }}>Review times depend on complete documents and operator approval. Our team keeps you updated through the process.</p>
       </PageHeader>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUp, Check, Copy } from 'lucide-react';
 import TypewriterText from './o2/TypewriterText';
 import AiOrb from './o2/AiOrb';
@@ -25,6 +25,63 @@ const CopyButton = ({ text }) => {
   );
 };
 
+const ChatComposer = ({ busy, onSend }) => {
+  const [input, setInput] = useState('');
+  const taRef = useRef(null);
+  const resizeFrameRef = useRef(0);
+
+  useEffect(() => () => window.cancelAnimationFrame(resizeFrameRef.current), []);
+
+  const send = () => {
+    if (!input.trim() || busy) return;
+    const question = input;
+    setInput('');
+    if (taRef.current) taRef.current.style.height = 'auto';
+    onSend(question);
+  };
+
+  const onComposerKey = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+      event.preventDefault();
+      send();
+    }
+  };
+
+  const onInputChange = (event) => {
+    const textarea = event.currentTarget;
+    setInput(textarea.value);
+    window.cancelAnimationFrame(resizeFrameRef.current);
+    resizeFrameRef.current = window.requestAnimationFrame(() => {
+      if (!taRef.current) return;
+      taRef.current.style.height = 'auto';
+      taRef.current.style.height = `${taRef.current.scrollHeight}px`;
+    });
+  };
+
+  return (
+    <form onSubmit={(event) => { event.preventDefault(); send(); }} className="o2-composer">
+      <textarea
+        ref={taRef}
+        rows={1}
+        value={input}
+        onChange={onInputChange}
+        onKeyDown={onComposerKey}
+        placeholder="Ask about bulk SMS, DLT, OTPs..."
+        aria-label="Your question"
+        maxLength={1000}
+        className="o2-ta"
+        data-autofocus
+      />
+      <div className="o2-composer-bar">
+        {input.length > 800 && <span className="o2-count">{input.length}/1000</span>}
+        <button type="submit" disabled={busy || !input.trim()} aria-label="Send message" className="o2-send-orb">
+          <ArrowUp size={18} strokeWidth={2.4} />
+        </button>
+      </div>
+    </form>
+  );
+};
+
 let nextId = 1;
 const makeMsg = (sender, text, extra = {}) => ({
   id: nextId++,
@@ -37,14 +94,12 @@ const makeMsg = (sender, text, extra = {}) => ({
 
 const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '' }) => {
   const [messages, setMessages] = useState(() => [makeMsg('ai', GREETING)]);
-  const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false); // waiting for the first bytes
   const [streaming, setStreaming] = useState(false); // bytes still arriving
   const [headRef, headClass] = useInView();
 
   const streamRef = useRef(null); // the chat box's own scrollable container
   const stickRef = useRef(true); // follow new text unless the visitor scrolled up
-  const taRef = useRef(null); // composer textarea (auto-grows)
   const busy = isTyping || streaming;
 
   // Scrolling stays inside the chat box (never the page). While an answer is
@@ -65,20 +120,18 @@ const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '
 
   useEffect(() => {
     scrollToBottom(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages.length, isTyping]);
 
   const patchMessage = (id, patch) =>
     setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
 
   const handleSend = async (userText) => {
-    const textToSend = userText || input;
+    const textToSend = userText || '';
     if (!textToSend.trim() || busy) return;
 
     const history = messages.map(({ sender, text }) => ({ sender, text }));
     stickRef.current = true;
     setMessages((prev) => [...prev, makeMsg('user', textToSend)]);
-    if (!userText) setInput('');
     setIsTyping(true);
 
     let replyId = null;
@@ -130,7 +183,6 @@ const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '
       const decoder = new TextDecoder();
       let aiText = '';
 
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -165,9 +217,6 @@ const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '
     } finally {
       setIsTyping(false);
       setStreaming(false);
-      if (window.turnstile && widgetIdRef.current) {
-        window.turnstile.reset(widgetIdRef.current);
-      }
     }
   };
 
@@ -179,21 +228,6 @@ const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '
     handleSend(initialQuestion);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuestion]);
-
-  // Grow the composer with its text (up to the CSS max-height), shrink back after sending.
-  useEffect(() => {
-    const el = taRef.current;
-    if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
-  }, [input]);
-
-  const onComposerKey = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
 
   // Fresh conversation (only the greeting so far): show the welcome screen instead of an empty thread.
   const isWelcome = messages.length === 1 && !busy;
@@ -268,29 +302,7 @@ const AiAssistant = ({ showHeading = true, embedded = false, initialQuestion = '
           )}
         </div>
 
-        <form
-          onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-          className="o2-composer"
-        >
-          <textarea
-            ref={taRef}
-            rows={1}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={onComposerKey}
-            placeholder="Ask about bulk SMS, DLT, OTPs..."
-            aria-label="Your question"
-            maxLength={1000}
-            className="o2-ta"
-            data-autofocus
-          />
-          <div className="o2-composer-bar">
-            {input.length > 800 && <span className="o2-count">{input.length}/1000</span>}
-            <button type="submit" disabled={busy || !input.trim()} aria-label="Send message" className="o2-send-orb">
-              <ArrowUp size={18} strokeWidth={2.4} />
-            </button>
-          </div>
-        </form>
+        <ChatComposer busy={busy} onSend={handleSend} />
 
         {/* Screen readers hear each finished answer once, not every typed character. */}
         <p className="o2-sr" role="status" aria-live="polite">{lastDone ? lastDone.text : ''}</p>

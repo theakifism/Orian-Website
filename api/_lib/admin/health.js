@@ -110,7 +110,7 @@ const CHECKS = [
     run: async () =>
       set('GROQ_API_KEY')
         ? { status: 'ok', detail: 'The AI assistant key is set.' }
-        : { status: 'warn', detail: 'GROQ_API_KEY is missing, so the AI assistant cannot answer.', hint: 'Add GROQ_API_KEY to your environment variables.' },
+        : { status: 'warn', detail: 'The AI service is not configured, so the assistant cannot answer.', hint: 'Add the AI service credentials to your environment variables.' },
   },
   {
     id: 'secrets', label: 'Security settings',

@@ -26,10 +26,14 @@ const About = ({ variant = 'full' }) => {
             <T k="About.2" d={"Orian "} /><span className="text-[#00AEEF]"><T k="About.3" d={"Teleservices"} /></span>
           </h2>
           <p className="text-[var(--text-soft)] text-base leading-relaxed">
-            <T k="About.4" d={"In a world of growing technology, communication plays a vital role in helping businesses spread their footprint globally."} />
+            {variant === 'full'
+              ? 'In a market where attention is limited and expectations are high, meaningful communication defines strong brands. At Orian Teleservices, we empower businesses with refined communication solutions—from Bulk SMS, RCS messaging, email services and WhatsApp Business API to voice calls and digital marketing.'
+              : <T k="About.4" d={"In a world of growing technology, communication plays a vital role in helping businesses spread their footprint globally."} />}
           </p>
           <p className="text-[var(--text-dim)] text-sm leading-relaxed">
-            <T k="About.5" d={"Orian Teleservices provides business messaging and related communication services. Contact our team to discuss current offerings and service arrangements."} />
+            {variant === 'full'
+              ? 'Our approach blends technology with strategy to deliver seamless customer engagement and measurable business outcomes. For brands that value precision, credibility and long-term growth, Orian Tele Services is a trusted communication partner.'
+              : <T k="About.5" d={"Orian Teleservices provides business messaging and related communication services. Contact our team to discuss current offerings and service arrangements."} />}
           </p>
           <div
             className="p-6 bg-[var(--surface)]/90 border border-[var(--border)] rounded-2xl backdrop-blur-xl shadow-2xl transition-all duration-300"

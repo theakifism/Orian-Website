@@ -189,7 +189,7 @@ export const serviceDetail = {
   'whatsapp-business-api': {
     overview: 'Complement high-volume SMS campaigns with verified WhatsApp Business API messaging. Broadcast pre-approved templates, send rich media statements and invoices, and automate two-way customer support with intelligent webhooks.',
     features: [
-      'Assisted Meta Business verification and official green-tick badge',
+      'Guidance through Meta Business verification requirements; approval is decided by Meta',
       'Broadcast messaging on pre-approved utility and marketing templates',
       'No-code and API-driven chatbot flows with interactive buttons',
       'Rich media support — PDF invoices, images, and quick-reply actions',
@@ -301,59 +301,108 @@ export const serviceDetail = {
       },
     ],
   },
-  'it-solutions': {
-    overview: 'One partner for the IT underneath your business. We set up and look after cloud hosting and networks, harden security, and run a helpdesk your team can call, so the systems that trigger your messages stay up and your staff have someone to ask.',
+  'email-services': {
+    overview: 'Email Services cover planned business email communications such as customer campaigns and announcements. Discuss audience, content, sending setup and reporting needs with the team; the available scope is confirmed for each project.',
     features: [
-      'Cloud hosting set-up and ongoing management',
-      'Network design and installation for offices and sites',
-      'Security hardening and regular reviews',
-      'Helpdesk support for your team',
-      'Integration of your systems with your messaging',
+      'Campaign goals and audience planning',
+      'Guidance on email content and templates',
+      'Discussion of sending and integration requirements',
+      'Reporting options agreed for your project',
     ],
     howItWorks: [
-      { title: 'Assess', desc: 'We review what you run today and where it is fragile.' },
-      {
-        title: 'Plan',
-        desc: 'We agree what will be built or fixed, who owns it and how it is tested.',
-      },
-      {
-        title: 'Implement',
-        desc: 'We build and migrate in short steps and show progress as we go.',
-      },
-      { title: 'Support', desc: 'Helpdesk and ongoing care under an agreement that suits you.' },
+      { title: 'Set the goal', desc: 'Share the audience, purpose and expected sending pattern.' },
+      { title: 'Plan the message', desc: 'Discuss content, templates, consent and list preparation.' },
+      { title: 'Confirm setup', desc: 'Agree the sending method, responsibilities and available reporting.' },
+      { title: 'Review', desc: 'Review the campaign outcome and next steps with the team.' },
     ],
-    useCases: ['Corporates', 'Retail', 'Banking', 'IT Services'],
     faqs: [
-      {
-        q: 'Do you manage hosting for us?',
-        a: 'Yes. We can set up and manage cloud hosting for your systems. Scope is agreed with you.',
-      },
-      {
-        q: 'Can the helpdesk support our staff?',
-        a: 'Yes. Helpdesk support for your team is part of the service. Hours and channels are confirmed in your agreement.',
-      },
-      {
-        q: 'Can you connect our systems to SMS?',
-        a: 'Yes. We integrate your applications with our messaging API so events in your systems send the right message.',
-      },
+      { q: 'What kind of email is this for?', a: 'This service is for planned customer email communications such as campaigns and announcements. Automated account and receipt messages are covered under Transaction Email.' },
+      { q: 'Can you work with our existing email platform?', a: 'Share your current setup and requirements. The team will confirm whether it can be supported.' },
+      { q: 'Do you provide campaign reporting?', a: 'Reporting options depend on the sending setup and will be agreed before work begins.' },
     ],
     sections: [
-      {
-        title: 'What managed IT covers',
-        p: 'We set up and look after cloud hosting, design and install networks for offices and sites, harden security and run a helpdesk your staff can call. The aim is to keep the systems underneath your business stable, including the ones that trigger your customer messages, so that outages and slow responses do not reach your customers.',
-      },
-      {
-        title: 'How an engagement starts',
-        p: 'We begin by reviewing what you run today and where it is fragile, such as single points of failure, unpatched systems, unclear ownership or missing backups. We then agree a plan with owners, timelines and how each change will be tested, and implement in short steps so you can see progress. Support continues after go-live with a clear way to raise issues.',
-      },
-      {
-        title: 'Security basics we focus on',
-        p: 'Most incidents come from basic gaps rather than exotic attacks. Typical priorities are keeping software patched, using multi-factor authentication, limiting who has administrator access, backing up data and testing the restore, and monitoring for unusual activity. We review these regularly and report what changed.',
-      },
-      {
-        title: 'Connecting your systems to messaging',
-        p: 'Order, billing, booking and support systems can call the SMS, voice and WhatsApp APIs directly so customers are notified without manual work. We help integrate them, handle credentials safely and set up monitoring for failed sends. See the [bulk SMS and OTP gateway](/services/bulk-sms-otp-gateways) page and the [SMPP versus REST guide](/resources/smpp-vs-rest-api) for the options.',
-      },
+      { title: 'Planned email communications', p: 'Email can support product announcements, customer updates and other planned communications. A clear audience, relevant content and appropriate permission to contact people should guide each campaign.' },
+      { title: 'A separate path for automated messages', p: 'Campaigns are planned and sent to an audience. Messages triggered by events in an application, such as a receipt or account update, have different integration and monitoring needs. See [Transaction Email](/services/transaction-email) for those use cases.' },
+      { title: 'Agree the scope before launch', p: 'Sending platform, domain setup, list preparation, content review and reporting depend on your existing tools and requirements. Discuss these with the team before scheduling a campaign.' },
+    ],
+  },
+  'digital-solutions': {
+    overview: 'Digital & IT Solutions brings together business websites, customer journeys, workflow improvements, system integrations, cloud hosting, network support, security and helpdesk services. The team will review your goals and confirm a practical scope before work begins.',
+    features: [
+      'Requirements discussion and project scoping',
+      'Website, customer experience and workflow planning',
+      'Application and messaging system integrations',
+      'Cloud hosting, network and security support',
+      'Helpdesk support for your team',
+      'Project steps, owners and handover agreed up front',
+    ],
+    howItWorks: [
+      { title: 'Assess', desc: 'Describe your goal and the current digital or IT setup.' },
+      { title: 'Plan', desc: 'Agree scope, dependencies, owners, timeline and how the work will be reviewed.' },
+      { title: 'Implement', desc: 'Deliver the agreed work in clear steps and share progress.' },
+      { title: 'Handover and support', desc: 'Document the result and agree any ongoing support.' },
+    ],
+    faqs: [
+      { q: 'What does Digital & IT Solutions include?', a: 'Depending on the agreed scope, work may include websites, customer journeys, workflow improvements, integrations, hosting, network and security support, or helpdesk services.' },
+      { q: 'Can you manage hosting and support our staff?', a: 'Hosting and helpdesk options can be discussed with the team. Service scope, channels and support hours are agreed for each engagement.' },
+      { q: 'Can you connect our systems to messaging?', a: 'Share the systems and customer flow you have in mind. SMS, voice, RCS, email and WhatsApp integration options can be discussed as part of project scoping.' },
+      { q: 'Do you offer fixed packages?', a: 'Project scope depends on your requirements. Contact the team to discuss an estimate and delivery plan.' },
+    ],
+    sections: [
+      { title: 'Digital projects and business IT', p: 'A digital project may improve a customer journey, replace repeated manual work or connect systems. IT support can cover the infrastructure around that work, including cloud hosting, office networks, security basics and helpdesk support.' },
+      { title: 'Keep the scope clear', p: 'Existing platforms, access, content, integrations and review responsibilities all affect delivery. Agree on the outcome, owners, milestones and handover before implementation starts.' },
+      { title: 'Managed IT and security', p: 'For ongoing IT needs, discuss hosting and network management, software updates, administrator access, backups and helpdesk coverage. The team will confirm which services and support arrangements are available for your business.' },
+      { title: 'Digital work alongside messaging', p: 'Digital experiences can connect with customer communications where the systems support it. Discuss how your website or application could use [bulk SMS and OTP](/services/bulk-sms-otp-gateways), [RCS Messaging](/services/rcs-business-messaging) or [Transaction Email](/services/transaction-email).' },
+    ],
+  },
+  'rcs-business-messaging': {
+    overview: 'RCS Messaging can support richer business conversations with branded sender details and interactive content on compatible devices and networks. Availability, features and fallback depend on the recipient, carrier and agreed setup.',
+    features: [
+      'Discussion of branded RCS message formats',
+      'Planning for cards, suggested replies and other supported content',
+      'Review of device, carrier and sender verification requirements',
+      'SMS fallback options discussed for your use case',
+    ],
+    howItWorks: [
+      { title: 'Check your audience', desc: 'Discuss recipient markets, devices and the intended use case.' },
+      { title: 'Plan the experience', desc: 'Choose message content and interactions suitable for the audience.' },
+      { title: 'Confirm availability', desc: 'Review sender setup, integration and network support requirements.' },
+      { title: 'Measure and adjust', desc: 'Agree what delivery and interaction information is available.' },
+    ],
+    faqs: [
+      { q: 'Does RCS work on every phone?', a: 'No. RCS features depend on device, messaging app, carrier and market support. Confirm availability for your target audience before planning a campaign.' },
+      { q: 'Can an RCS message include buttons or images?', a: 'RCS may support richer content and interactions on compatible devices and networks. The available options depend on the service setup.' },
+      { q: 'What happens when RCS is unavailable?', a: 'An SMS fallback may be possible depending on the integration and campaign configuration. Confirm the fallback behavior before launch.' },
+    ],
+    sections: [
+      { title: 'A richer format where it is supported', p: 'RCS can add branded presentation and interactive elements to business messaging. The experience depends on the recipient device, messaging app, carrier and local availability, so campaign planning should include a clear fallback.' },
+      { title: 'Plan for eligibility and consent', p: 'Confirm sender setup, eligible audience, message purpose and recipient permissions before sending. Availability and policy requirements can vary across markets and providers.' },
+      { title: 'RCS alongside SMS', p: 'RCS and SMS can serve different parts of the same communication plan. Discuss how RCS availability and [bulk SMS delivery](/services/bulk-sms-otp-gateways) may fit your audience and fallback needs.' },
+    ],
+  },
+  'transaction-email': {
+    overview: 'Transaction Email covers automated messages triggered by events in your application, such as receipts, account notices and service updates. Discuss the integration, expected volume and reporting requirements with the team.',
+    features: [
+      'Event-triggered email use-case planning',
+      'Discussion of API or platform integration requirements',
+      'Template and message flow review',
+      'Delivery and failure reporting options agreed for your setup',
+    ],
+    howItWorks: [
+      { title: 'Map the events', desc: 'Identify which application events should send an email.' },
+      { title: 'Plan the content', desc: 'Review message templates and the information each event needs.' },
+      { title: 'Connect the system', desc: 'Confirm the integration method and safe handling of credentials.' },
+      { title: 'Monitor', desc: 'Agree how delivery status and sending issues will be reviewed.' },
+    ],
+    faqs: [
+      { q: 'What is Transaction Email used for?', a: 'Common examples include receipts, password resets, booking confirmations and account activity notices triggered by an application.' },
+      { q: 'Is this the same as an email campaign?', a: 'No. Transaction Email is triggered by an individual customer or system event. Planned messages to an audience are covered under Email Services.' },
+      { q: 'Can you integrate with our application?', a: 'Share your application, event flow and technical requirements. The team will confirm a suitable integration option.' },
+    ],
+    sections: [
+      { title: 'Messages tied to an event', p: 'Transactional messages respond to a customer or system action. Examples include a purchase receipt, password reset, booking confirmation or important account notice. These messages should be timely, relevant and limited to the event they confirm.' },
+      { title: 'Design for safe, reliable flows', p: 'Plan how your application requests a send, handles errors and avoids accidental duplicate messages. Confirm the available delivery information and monitoring approach for your integration.' },
+      { title: 'Campaigns are a separate service', p: 'Transaction Email is intended for event-triggered messages. Planned audience communications and campaigns are described under [Email Services](/services/email-services).' },
     ],
   },
 };

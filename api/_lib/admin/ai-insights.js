@@ -32,7 +32,7 @@ export default requireAdmin(async (req, res) => {
   }
 
   if (!process.env.GROQ_API_KEY) {
-    return res.status(500).json({ error: 'AI insights are not configured (GROQ_API_KEY missing).' });
+    return res.status(500).json({ error: 'AI insights are not configured.' });
   }
 
   let supabase;
@@ -92,7 +92,7 @@ export default requireAdmin(async (req, res) => {
   } catch (err) {
     console.error('Groq insights error:', err);
     if ([429, 500, 502, 503, 504].includes(err.status)) {
-      return res.status(503).json({ error: 'Groq is busy right now — please try again in a moment.' });
+      return res.status(503).json({ error: 'The AI service is busy right now — please try again in a moment.' });
     }
     return res.status(500).json({ error: 'Failed to generate insights. Please try again shortly.' });
   }

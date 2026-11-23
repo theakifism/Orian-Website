@@ -24,6 +24,11 @@
   --o-dur-s: 220ms;
 
   font-family: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-synthesis: none;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.011em;
@@ -134,7 +139,7 @@
 }
 .o2-hero-grid { display: grid; gap: 1.5rem; align-items: center; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 960px) {
-  .o2-hero { padding: 9rem 0 4.5rem; min-height: min(100svh, 920px); display: flex; align-items: center; }
+  .o2-hero { padding: 9rem 0 4.5rem; min-height: min(100vh, 920px); min-height: min(100svh, 920px); display: flex; align-items: center; }
   .o2-hero-grid { grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: 3rem; width: 100%; }
 }
 .o2-hero-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 1.6rem; }
@@ -283,6 +288,8 @@
 .o2-f-report { --z: 96px; bottom: 6%; left: -14px; width: 160px; }
 .o2-f-stat { display: none; --z: 128px; }
 .o2-f-tpl { --z: 70px; top: 31%; right: -16px; display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; color: var(--o-text); font-weight: 600; font-size: 0.74rem; }
+.o2-f-stat .o2-f-title { white-space: normal; line-height: 1.35; overflow-wrap: anywhere; }
+.o2-f-stat .o2-f-title:last-child { margin-bottom: 0; }
 /* >= 640px: floats move out beside the phone (free space each side is ~170px) */
 @media (min-width: 640px) {
   .o2-f-report { top: 13%; bottom: auto; left: -150px; width: 160px; }
@@ -311,7 +318,7 @@
 .o2-stage[data-tier='lite'] .o2-steps .dot b { opacity: 1; }
 .o2-stage[data-tier='lite'] .o2-steps .lbl { opacity: 1; }
 
-.o2-stat-val { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.05em; color: var(--o-text); line-height: 1; margin: 0; }
+.o2-stat-val { font-size: clamp(1.35rem, 2.3vw, 1.9rem); font-weight: 600; letter-spacing: -0.05em; color: var(--o-text); line-height: 1.05; margin: 0; overflow-wrap: anywhere; }
 .o2-stat-val small { font-size: 1rem; font-weight: 600; margin-left: 1px; color: var(--o-text-2); }
 .o2-spark { display: block; width: 100%; height: 26px; margin-top: 0.55rem; }
 .o2-spark path { stroke: var(--o-accent); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }

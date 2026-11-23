@@ -368,9 +368,9 @@ export const industryDetail = {
         tail: ' when a message is not acknowledged.',
       },
       {
-        slug: 'it-solutions',
+        slug: 'digital-solutions',
         lead: 'If you need hosting, networks or helpdesk alongside messaging, see our',
-        anchor: 'managed IT solutions',
+        anchor: 'Digital & IT Solutions',
         tail: '.',
       },
     ],
@@ -437,9 +437,9 @@ export const industryDetail = {
         tail: ', with delivery reports per message.',
       },
       {
-        slug: 'it-solutions',
+        slug: 'digital-solutions',
         lead: 'For hosting, security hardening and helpdesk alongside messaging, see our',
-        anchor: 'managed IT solutions',
+        anchor: 'Digital & IT Solutions',
         tail: '.',
       },
       {

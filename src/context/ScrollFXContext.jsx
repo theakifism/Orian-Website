@@ -11,7 +11,6 @@ const getReduceMotion = () => {
 };
 
 const ScrollFXContext = createContext({
-  direction: 'down',
   atTop: true,
   atBottom: false,
   reduceMotion: false,
@@ -21,7 +20,6 @@ export const useScrollFX = () => useContext(ScrollFXContext);
 
 export const ScrollFXProvider = ({ children }) => {
   const [state, setState] = useState({
-    direction: 'down',
     atTop: true,
     atBottom: false,
     reduceMotion: getReduceMotion(),
@@ -32,7 +30,6 @@ export const ScrollFXProvider = ({ children }) => {
   // ever change the UI -- so keeping it in a ref (instead of state) means we
   // don't re-render every Reveal/TiltCard/etc. on the page on every single
   // scroll tick, which was the main source of scroll jank.
-  const lastY = useRef(0);
   const ticking = useRef(false);
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -46,21 +43,18 @@ export const ScrollFXProvider = ({ children }) => {
       const docHeight = document.documentElement.scrollHeight;
 
       const prev = stateRef.current;
-      const direction = y > lastY.current ? 'down' : y < lastY.current ? 'up' : prev.direction;
       const atTop = y <= EDGE;
       const atBottom = y + viewport >= docHeight - EDGE;
 
-      lastY.current = y;
       ticking.current = false;
 
-      if (prev.direction === direction && prev.atTop === atTop && prev.atBottom === atBottom) {
-        return;
-      }
+      if (prev.atTop === atTop && prev.atBottom === atBottom) return;
 
-      setState((current) => ({ ...current, direction, atTop, atBottom }));
+      const next = { ...prev, atTop, atBottom };
+      stateRef.current = next;
+      setState(next);
 
-      // Expose as CSS custom props too, handy for pure-CSS tweaks.
-      document.documentElement.dataset.scrollDir = direction;
+      // Expose edge state for any pure-CSS tweaks.
       document.documentElement.dataset.atTop = String(atTop);
       document.documentElement.dataset.atBottom = String(atBottom);
     };

@@ -115,6 +115,8 @@
 
 html {
   background-color: var(--bg);
+  overflow-x: hidden;
+  overflow-x: clip;
   scroll-behavior: smooth;
   /* Offsets in-page anchor jumps (nav links, "#services" etc.) so the
      target section's heading lands below the fixed 80px-tall header
@@ -126,6 +128,11 @@ body {
   background-color: var(--bg);
   color: var(--text);
   font-family: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, sans-serif;
+  font-synthesis: none;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
@@ -185,7 +192,7 @@ body {
 /* reads as "a new page", not "this page changed".       */
 /* ---------------------------------------------------- */
 .route-bar-run {
-  animation: routeBarRun 0.48s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: routeBarRun 0.16s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes routeBarRun {
@@ -204,7 +211,7 @@ body {
 }
 
 .page-enter {
-  animation: pageEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: pageEnter 0.14s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes typewriterBlink {
@@ -215,7 +222,7 @@ body {
 @keyframes pageEnter {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -252,61 +259,29 @@ body {
 .scroll-edge-blur-top {
   top: 80px; /* sits just below the fixed nav */
   height: 70px;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
   background: linear-gradient(to bottom, var(--bg) 15%, transparent 100%);
 }
 
 .scroll-edge-blur-bottom {
   bottom: 0;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
-  mask-image: linear-gradient(to top, black 0%, transparent 100%);
   background: linear-gradient(to top, var(--bg) 25%, transparent 100%);
 }
 
 .reveal {
   opacity: 0;
-  filter: blur(14px);
-  transform: translateY(var(--reveal-y, 56px)) scale(0.97);
+  transform: translateY(var(--reveal-y, 32px));
   transition:
-    opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.38s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
+    opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.in-view {
   opacity: 1;
-  filter: blur(0px);
-  transform: translateY(0) scale(1);
-}
-
-/* --- 3D variant: content tilts up out of the page as it scrolls in --- */
-.reveal-3d {
-  perspective: 1400px;
+  transform: translateY(0);
 }
 
 .reveal-3d {
-  transform:
-    perspective(1400px)
-    translateY(var(--reveal-y, 64px))
-    rotateX(var(--reveal-rotate, 20deg))
-    scale(0.92);
-  transform-origin: var(--reveal-origin, center bottom);
-  filter: blur(10px);
-  transition:
-    opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.reveal-3d.in-view {
-  transform: perspective(1400px) translateY(0) rotateX(0deg) scale(1);
-  filter: blur(0px);
+  transform: translateY(var(--reveal-y, 32px));
 }
 
 /* --- Side variant: content slides in from the left/right instead of      */
@@ -315,19 +290,15 @@ body {
 /* --reveal-x (see Reveal.jsx's `variant="side"` / `side="left|right"`).  */
 .reveal-side {
   opacity: 0;
-  filter: blur(12px);
-  transform: translateX(var(--reveal-x, 72px)) scale(0.96);
+  transform: translateX(var(--reveal-x, 32px));
   transition:
-    opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform, filter;
+    opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal-side.in-view {
   opacity: 1;
-  filter: blur(0px);
-  transform: translateX(0) scale(1);
+  transform: translateX(0);
 }
 
 /* Give any cards/grid items inside a revealed section a subtle staggered
@@ -844,9 +815,8 @@ body {
 .reveal-mobile {
   opacity: 0;
   transform: translateY(22px);
-  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal-mobile.in-view {
@@ -989,14 +959,14 @@ body {
   position: fixed; inset: 0; z-index: 999;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg);
-  animation: o2-splash-out 400ms ease 1350ms forwards;
+  animation: o2-splash-out 240ms ease 900ms forwards;
 }
 .o2-splash-text {
   display: flex; align-items: center; margin: 0;
   font: 700 clamp(1.25rem, 3vw, 1.875rem) / 1.2 'Segoe UI', 'Helvetica Neue', Arial, system-ui, sans-serif;
   letter-spacing: 0.025em; color: var(--text);
 }
-.o2-splash-type { display: inline-block; white-space: nowrap; clip-path: inset(0 100% 0 0); animation: o2-splash-type 1000ms steps(25, end) 100ms forwards; }
+.o2-splash-type { display: inline-block; white-space: nowrap; clip-path: inset(0 100% 0 0); animation: o2-splash-type 700ms steps(25, end) 100ms forwards; }
 .o2-splash-cursor { display: inline-block; width: 2px; height: 1em; margin-left: 2px; background: #00AEEF; animation: typewriterBlink 1s step-end infinite; }
 @keyframes o2-splash-type { to { clip-path: inset(0 0 0 0); } }
 @keyframes o2-splash-out { to { opacity: 0; visibility: hidden; pointer-events: none; } }

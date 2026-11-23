@@ -6,6 +6,7 @@ import { LangProvider } from './context/LangContext';
 import { UIProvider } from './context/UIContext';
 import Layout from './components/Layout';
 import SiteShell from './components/SiteShell';
+import RouteError from './components/RouteError';
 import { ContentProvider } from './content';
 import { buildData } from './content/build-data';
 
@@ -60,6 +61,7 @@ export const routes = [
   {
     path: '/',
     element: <RootLayout />,
+    errorElement: <RouteError />,
     children: [
       {
         path: 'admin/login',

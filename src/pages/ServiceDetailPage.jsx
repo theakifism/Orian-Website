@@ -32,6 +32,18 @@ const ServiceDetailPage = () => {
     title: `${service.title} | Orian Teleservices`.slice(0, 60),
     description: service.desc,
   };
+  const requirementTypes = {
+    'bulk-sms-otp-gateways': 'Bulk SMS & OTP Gateway',
+    'dlt-compliance': 'DLT Assistance & Compliance',
+    'voice-sms-ivr': 'Voice SMS & IVR',
+    'whatsapp-business-api': 'WhatsApp Business API',
+    'social-media-handling': 'Social Media Handling',
+    'email-services': 'Email Services',
+    'digital-solutions': 'Digital & IT Solutions',
+    'rcs-business-messaging': 'RCS Messaging',
+    'transaction-email': 'Transaction Email',
+  };
+  const requirementType = requirementTypes[service.slug] || 'General Enquiry';
 
   return (
     <>
@@ -48,7 +60,7 @@ const ServiceDetailPage = () => {
         breadcrumbs={[{ label: 'Services', href: '/services' }, { label: service.title }]}
       >
         <div className="o2-cta-row" style={{ marginTop: '2rem' }}>
-          <button type="button" className="o2-btn o2-btn-primary" onClick={() => openLead(`service-${service.slug}`)} data-track="service_talk_to_us">Talk to us <Arrow /></button>
+          <button type="button" className="o2-btn o2-btn-primary" onClick={() => openLead(`service-${service.slug}`, { requirementType, initialMessage: `I’m interested in ${service.title}. Please contact me about setup and next steps.` })} data-track="service_talk_to_us">Talk to us <Arrow /></button>
           <button type="button" className="o2-btn o2-btn-ghost" onClick={openCommand}>Ask the AI assistant</button>
         </div>
       </PageHeader>

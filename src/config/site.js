@@ -1,13 +1,13 @@
 // Site-wide contact, status and image settings.
 
 // Helpline numbers already published on the existing site.
-export const PHONE_PRIMARY = '+919552556786';
-export const PHONE_PRIMARY_DISPLAY = '+91 95525 56786';
+export const PHONE_PRIMARY = '+919850087786';
+export const PHONE_PRIMARY_DISPLAY = '+91 98500 87786';
 export const EMAIL_SALES = 'orianteleservices@gmail.com';
 export const EMAIL_SUPPORT = 'support@orian.in';
 
 // Confirm this published contact number is registered on WhatsApp before relying on the link.
-export const WHATSAPP_NUMBER = '919552556786';
+export const WHATSAPP_NUMBER = '919850087786';
 export const whatsappLink = (text = 'Hello Orian, I would like to talk about bulk SMS.') =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 

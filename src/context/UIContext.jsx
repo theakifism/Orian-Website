@@ -14,7 +14,8 @@ const UIContext = createContext({ openLead: () => {}, openCommand: () => {} });
 export const UIProvider = ({ children }) => {
   const [cmdOpen, setCmdOpen] = useState(false);
   const [leadOpen, setLeadOpen] = useState(false);
-  const [leadSource, setLeadSource] = useState('');
+  const [leadMounted, setLeadMounted] = useState(false);
+  const [leadRequest, setLeadRequest] = useState({ source: '', requirementType: 'General Enquiry', initialMessage: '' });
   const [cmdQuestion, setCmdQuestion] = useState('');
 
   // openCommand() just opens the bar; openCommand('How fast can I go live?') opens it and asks that question.
@@ -23,7 +24,17 @@ export const UIProvider = ({ children }) => {
     setCmdOpen(true);
     track('command_bar_open', { prefilled: typeof question === 'string' });
   }, []);
-  const openLead = useCallback((source = 'unknown') => { setLeadSource(source); setLeadOpen(true); track('lead_dialog_open', { source }); }, []);
+  const openLead = useCallback((source = 'unknown', options = {}) => {
+    const request = {
+      source,
+      requirementType: options.requirementType || 'General Enquiry',
+      initialMessage: options.initialMessage || '',
+    };
+    setLeadRequest(request);
+    setLeadMounted(true);
+    setLeadOpen(true);
+    track('lead_dialog_open', { source, requirementType: request.requirementType });
+  }, []);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -43,12 +54,10 @@ export const UIProvider = ({ children }) => {
   return (
     <UIContext.Provider value={value}>
       {children}
-      {(cmdOpen || leadOpen) && (
-        <Suspense fallback={null}>
-          {cmdOpen && <CommandBar question={cmdQuestion} onClose={() => setCmdOpen(false)} />}
-          {leadOpen && <LeadDialog source={leadSource} onClose={() => setLeadOpen(false)} />}
-        </Suspense>
-      )}
+      <Suspense fallback={null}>
+        {cmdOpen && <CommandBar question={cmdQuestion} onClose={() => setCmdOpen(false)} />}
+        {leadMounted && <LeadDialog {...leadRequest} open={leadOpen} onClose={() => setLeadOpen(false)} />}
+      </Suspense>
     </UIContext.Provider>
   );
 };

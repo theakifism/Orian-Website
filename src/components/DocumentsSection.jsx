@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { litCardProps } from '../utils/litCard';
 import { T } from '../content';
+import { readJsonResponse } from '../utils/http';
 
 const formatSize = (bytes) => {
   if (!bytes) return '';
@@ -13,7 +14,7 @@ const DocumentsSection = () => {
 
   useEffect(() => {
     fetch('/api/documents')
-      .then((res) => res.json())
+      .then((res) => readJsonResponse(res))
       .then((data) => setDocuments(data.documents || []))
       .catch(() => setDocuments([]));
   }, []);

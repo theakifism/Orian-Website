@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import Seo from '../seo/Seo';
@@ -71,8 +70,9 @@ const PrivacyPage = () => {
           <Section title="4. How We Share Information">
             <p>
               We do not sell your personal information. Enquiry and visit data may be processed by the providers we use
-              for database hosting, website hosting, email delivery and spam prevention, only as needed to operate the
-              site and respond to you. We may also disclose information when required by law or valid legal process.
+              for database hosting, website hosting, email delivery, spam prevention and AI chat responses, only
+              as needed to operate the site and respond to you. Chat messages and recent conversation context may be
+              sent to our AI service provider to generate a response. We may also disclose information when required by law or valid legal process.
             </p>
           </Section>
 

@@ -18,6 +18,10 @@ function validate(body) {
   const contact = (body.contact || '').trim();
   const message = (body.message || '').trim();
 
+  // Consent must be enforced by the server; browser-side validation alone can
+  // be bypassed by posting directly to this endpoint.
+  if (body.consent !== true) errors.consent = 'Please accept to be contacted before submitting.';
+
   if (!name) errors.name = 'Name is required.';
   else if (name.length > MAX_LEN.name) errors.name = 'Name is too long.';
 

@@ -5,10 +5,11 @@ import { Close } from './Icons';
  * Accessible modal: role=dialog, labelled, Esc to close, focus moves in and is
  * trapped, page scroll locked, focus returns to the opener on close.
  */
-const Dialog = ({ title, onClose, wide = false, className = '', icon = null, subtitle = null, headerRight = null, children }) => {
+const Dialog = ({ title, onClose, open = true, wide = false, className = '', icon = null, subtitle = null, headerRight = null, children }) => {
   const ref = useRef(null);
 
   useEffect(() => {
+    if (!open) return undefined;
     const opener = document.activeElement;
     const node = ref.current;
     const prevOverflow = document.body.style.overflow;
@@ -40,10 +41,10 @@ const Dialog = ({ title, onClose, wide = false, className = '', icon = null, sub
       document.body.style.overflow = prevOverflow;
       opener?.focus?.();
     };
-  }, [onClose]);
+  }, [onClose, open]);
 
   return (
-    <div className="o2 o2-scrim" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div className="o2 o2-scrim" hidden={!open} aria-hidden={!open} style={!open ? { display: 'none' } : undefined} onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={ref} className={`o2-dialog${wide ? ' is-wide' : ''}${className ? ` ${className}` : ''}`} role="dialog" aria-modal="true" aria-label={title}>
         <div className="o2-dialog-head">
           {icon || subtitle ? (

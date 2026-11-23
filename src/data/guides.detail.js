@@ -470,7 +470,7 @@ export const guideDetail = {
         p: 'Whichever you choose, test the whole flow in a sandbox before sending to real users: a successful send, a failed send, a delivery report arriving late, and a duplicate event. The [developers page](/developers) has a quick start and sample requests, and our [bulk SMS and OTP gateway](/services/bulk-sms-otp-gateways) page lists what is supported.',
       },
       {
-        p: 'If you are running your own servers and want help with hosting, networking and monitoring around the integration, our [managed IT solutions](/services/it-solutions) cover that too. If you want to compare options for your volumes, [talk to our team](/contact).',
+        p: 'If you are running your own servers and want help with hosting, networking and monitoring around the integration, our [Digital & IT Solutions](/services/digital-solutions) service can help. If you want to compare options for your volumes, [talk to our team](/contact).',
       },
     ],
   },

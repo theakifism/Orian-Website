@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { readJsonResponse } from '../utils/http';
 
 // Same public site key + widget-loading pattern already used on the public
 // Special Requirement form (see src/components/SpecialRequirement.jsx) --
@@ -98,7 +99,7 @@ const AdminLogin = () => {
         credentials: 'same-origin',
         body: JSON.stringify({ ...form, turnstileToken }),
       });
-      const data = await res.json();
+      const data = await readJsonResponse(res);
       if (!res.ok) {
         setError(data.message || data.error || 'Login failed.');
         // A stale/used token can't be resubmitted -- reset the widget so the
@@ -139,28 +140,32 @@ const AdminLogin = () => {
           <p className="text-sm text-[var(--text-dim)]">Employee sign-in only.</p>
         </div>
 
-        <label className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-2">
+        <label htmlFor="admin-email" className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-2">
           Email
         </label>
         <input
           type="email"
+          id="admin-email"
           name="email"
           value={form.email}
           onChange={handleChange}
           required
           autoFocus
+          autoComplete="username"
           className="w-full mb-4 bg-[var(--overlay)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/40"
         />
 
-        <label className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-2">
+        <label htmlFor="admin-password" className="text-xs font-mono uppercase tracking-wider text-[var(--text-faint)] block mb-2">
           Password
         </label>
         <input
           type="password"
+          id="admin-password"
           name="password"
           value={form.password}
           onChange={handleChange}
           required
+          autoComplete="current-password"
           className="w-full mb-6 bg-[var(--overlay)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/40"
         />
 
